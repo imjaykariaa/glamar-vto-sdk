@@ -166,7 +166,7 @@
   --gvto-z-coach:     14;
   --gvto-z-processing:15;
   --gvto-z-sheet:     20;
-  --gvto-z-catalog:   20;
+  --gvto-z-catalog:   30;
   --gvto-z-toast:     40;
 }
 
@@ -219,6 +219,7 @@
   overflow-y: auto;
 }
 .gvto-empty-card {
+  position: relative;
   width: 100%;
   max-width: 420px;
   display: flex;
@@ -231,6 +232,23 @@
   border-radius: 24px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 40px rgba(0, 0, 0, 0.06);
 }
+.gvto-empty-help {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gvto-text-2);
+  background: var(--gvto-fill-3);
+  transition: background var(--gvto-d-std) var(--gvto-ease), color var(--gvto-d-std) var(--gvto-ease), transform var(--gvto-d-fast) linear;
+}
+.gvto-empty-help:hover { background: var(--gvto-fill-4); color: var(--gvto-text-1); }
+.gvto-empty-help:active { transform: scale(0.94); }
+.gvto-empty-help svg { width: 16px; height: 16px; }
 .gvto-empty-headline {
   font-size: 24px;
   font-weight: 600;
@@ -310,6 +328,11 @@
 
 /* ============ Before/After slider ============ */
 .gvto-slider { position: absolute; inset: 0; pointer-events: none; }
+/* When compare is OFF, the after image shows full-bleed and the divider,
+ * handle, and labels are hidden — no off-canvas leaks. */
+.gvto-slider.is-compare-off .gvto-slider-divider,
+.gvto-slider.is-compare-off .gvto-slider-handle,
+.gvto-slider.is-compare-off .gvto-slider-labels { display: none; }
 .gvto-slider-after-wrap {
   position: absolute;
   inset: 0;
@@ -356,6 +379,7 @@
   transition: transform 120ms linear, box-shadow 220ms var(--gvto-ease);
   user-select: none;
   outline: none;
+  touch-action: none;                       /* block native scroll while dragging */
 }
 .gvto-slider-handle:hover { transform: translate(-50%, -50%) scale(1.04); }
 .gvto-slider-handle:active { transform: translate(-50%, -50%) scale(0.96); }
@@ -1035,6 +1059,60 @@
   color: var(--gvto-text-inv);
 }
 
+/* ============ Share menu (desktop fallback; inside sheet) ============ */
+.gvto-share { display: flex; flex-direction: column; gap: var(--gvto-s-4); padding: var(--gvto-s-1) 0 var(--gvto-s-2); }
+.gvto-share-title {
+  font-size: var(--gvto-fs-title);
+  font-weight: var(--gvto-fw-semibold);
+  letter-spacing: var(--gvto-tracking-title);
+  line-height: var(--gvto-lh-title);
+  color: var(--gvto-text-1);
+}
+.gvto-share-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--gvto-s-2);
+}
+.gvto-share-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gvto-s-2);
+  padding: var(--gvto-s-3) var(--gvto-s-2);
+  border-radius: var(--gvto-r-4);
+  background: var(--gvto-fill-3);
+  color: var(--gvto-text-1);
+  text-decoration: none;
+  font-size: var(--gvto-fs-foot);
+  font-weight: var(--gvto-fw-medium);
+  letter-spacing: var(--gvto-tracking-tight);
+  transition: background var(--gvto-d-std) var(--gvto-ease), transform var(--gvto-d-fast) linear;
+  cursor: pointer;
+  text-align: center;
+}
+.gvto-share-item:hover { background: var(--gvto-fill-4); }
+.gvto-share-item:active { transform: scale(0.97); }
+.gvto-share-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gvto-text-1);
+}
+.gvto-share-icon svg { width: 20px; height: 20px; }
+.gvto-share-label {
+  line-height: var(--gvto-lh-foot);
+  color: var(--gvto-text-2);
+}
+
+/* Narrow viewports: show 3-wide first row, 2 on second */
+@media (max-width: 400px) {
+  .gvto-share-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
 /* ============ Help guide (inside expanded sheet) ============ */
 .gvto-guide { display: flex; flex-direction: column; gap: 4px; padding: 4px 0 8px; }
 .gvto-guide-title {
@@ -1198,7 +1276,7 @@
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  z-index: 30;
+  z-index: var(--gvto-z-catalog);
   opacity: 0;
   pointer-events: none;
   transition: opacity 220ms var(--gvto-ease);

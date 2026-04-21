@@ -1,14 +1,59 @@
 /**
  * GlamAR Fashion VTO — Front-end SDK (Apple-inspired, mobile-first)
  *
- * Engineer integration points (all in the API object at the bottom):
- *   - API.uploadUserPhoto(file, config)   → { photoId, url }
- *   - API.fetchCatalog(config)            → { items, categories }
- *   - API.generateTryOn({ photo, product, size, config }) → { url }
- *   - API.addToCart(product, size, config) → { ok, bagUrl }
+ * ENGINEER INTEGRATION POINTS — all in the API object at the bottom of the file:
  *
- * Catalog item shape (see spec): { id, name, categoryId, image, price, priceCompareAt,
- *   currency, sizes: [{label, sku, inStock}], stockStatus, tryOnAsset }
+ *   API.fetchCatalog(config) → { items, categories }
+ *     GET {apiBaseUrl}/catalog — must return merchant items in the shape
+ *     defined below.
+ *
+ *   API.generateTryOn({ photo, product, size, config }) → { url }
+ *     POST {apiBaseUrl}/tryon returns { jobId }; then poll
+ *     GET {apiBaseUrl}/tryon/:jobId every ~2s until status === 'complete'.
+ *     Implement the polling loop INSIDE this function; resolve with { url }
+ *     when the job is done. On timeout/fail, throw — the SDK surfaces a
+ *     retry banner.
+ *
+ *   API.addToCart(product, size, config) → { ok, bagUrl? }
+ *     Either hit {apiBaseUrl}/cart yourself, or delegate to the
+ *     merchant-supplied config.onAddToCart(product, size) hook (recommended).
+ *
+ * CONFIG — passed to GlamarVTO.init({...}):
+ *   container: HTMLElement | string selector     (default '#glamar-vto-root')
+ *   apiKey, apiBaseUrl:  GlamAR credentials
+ *   catalog, categories: pre-loaded overrides for API.fetchCatalog
+ *   defaultPhotoUrl:     string | null — optional pre-filled "before" photo
+ *                        (pass null to force the empty "Try it on" state)
+ *   onEvent:             fn({ type, data, timestamp }) — analytics hook
+ *   onAddToCart:         fn(product, size) → Promise<{ ok, bagUrl? }>
+ *   onClose:             fn() — merchant handler for the top-right X.
+ *                        If omitted, the SDK fades its root container out.
+ *
+ * EVENTS emitted via onEvent (22 total):
+ *   ready, upload_start, upload_complete, photo_confirm, photo_retake,
+ *   file_too_large, catalog_open, catalog_close, product_select, size_select,
+ *   tryon_start, tryon_complete, tryon_error, tryon_cancel, compare_toggle,
+ *   add_to_cart, add_to_cart_error, share_start, share_menu_open, share,
+ *   share_error, help_open, close
+ *
+ * CATALOG ITEM SHAPE:
+ *   {
+ *     id: string,
+ *     name: string,
+ *     categoryId: string,
+ *     image: string,              // product thumbnail URL (4:5 recommended)
+ *     price: number,              // minor units in the given currency
+ *     priceCompareAt?: number,    // optional strikethrough price
+ *     currency: string,           // ISO 4217 (e.g. 'INR', 'USD')
+ *     sizes: [{ label, sku, inStock: boolean }],
+ *     stockStatus: 'in_stock' | 'low_stock' | 'out_of_stock',
+ *     tryOnAsset: string          // URL passed to the try-on engine
+ *   }
+ *
+ * CATEGORY SHAPE: { id: string, label: string }
+ *
+ * Session model: photo is held in-memory only (URL.createObjectURL). Not
+ * persisted across sessions — every fresh SDK load starts from the empty state.
  */
 (function (global) {
   'use strict';
@@ -119,6 +164,10 @@
     sliderArrows: `<svg ${svgAttrs} stroke-width="2"><path d="M9 8l-3 4 3 4M15 8l3 4-3 4"/></svg>`,
     hanger:    `<svg ${svgAttrs}><path d="M12 7a2 2 0 1 1-2-2"/><path d="M12 8v2l9 5.5a1 1 0 0 1-.5 1.8H3.5a1 1 0 0 1-.5-1.8L12 10"/></svg>`,
     bag:       `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 7V6a4 4 0 0 1 8 0v1h2.2a1 1 0 0 1 1 .9l.9 10.5A2 2 0 0 1 18.1 21H5.9a2 2 0 0 1-2-2.2L4.8 7.9A1 1 0 0 1 5.8 7H8zm2 0h4V6a2 2 0 1 0-4 0v1z"/></svg>`,
+    copy:      `<svg ${svgAttrs}><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>`,
+    twitterX:  `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21l-6.522 7.454L22 22h-6.804l-4.63-6.053L4.9 22H2.143l6.977-7.976L1.5 2h6.96l4.188 5.533L18.244 2zm-1.178 18.34h1.583L7.112 3.56H5.412l11.654 16.78z"/></svg>`,
+    whatsapp:  `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2a9.9 9.9 0 0 0-8.52 14.97L2 22l5.14-1.34A9.9 9.9 0 1 0 12.04 2zm0 18.13a8.22 8.22 0 0 1-4.19-1.15l-.3-.18-3.05.8.81-2.97-.2-.31a8.23 8.23 0 1 1 6.93 3.81zm4.56-6.16c-.25-.12-1.47-.73-1.7-.81-.22-.08-.39-.12-.56.12-.16.25-.63.81-.78.98-.14.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.48-1.38-1.73-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43l-.48-.01c-.17 0-.43.06-.66.31-.22.25-.85.83-.85 2.03 0 1.2.87 2.36.99 2.52.12.17 1.72 2.63 4.17 3.69.58.25 1.04.4 1.4.51.59.19 1.12.16 1.54.1.47-.07 1.47-.6 1.68-1.19.21-.59.21-1.09.14-1.19-.06-.1-.22-.16-.47-.28z"/></svg>`,
+    email:     `<svg ${svgAttrs}><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7l8.5 6 8.5-6"/></svg>`,
   };
 
   // ---------- SDK ----------
@@ -199,6 +248,7 @@
           </div>
           <div class="gvto-empty" data-role="empty" style="display:none;">
             <div class="gvto-empty-card">
+              <button class="gvto-empty-help" data-action="help" aria-label="How it works">${icons.help}</button>
               <div class="gvto-empty-headline">See it on you</div>
               <div class="gvto-empty-sub">Upload one photo. Try any piece, in seconds.</div>
               <div class="gvto-empty-examples" aria-hidden="true">
@@ -264,7 +314,7 @@
                 <div class="gvto-catalog-title">The Collection</div>
                 <button class="gvto-catalog-close" data-action="close-catalog" aria-label="Close">${icons.close}</button>
               </div>
-              <div class="gvto-search" data-role="search-wrap" style="display:none;">
+              <div class="gvto-search" data-role="search-wrap">
                 ${icons.search}
                 <input type="text" placeholder="Search the collection" data-role="search-input" />
               </div>
@@ -354,6 +404,11 @@
           case 'close-catalog': this.closeCatalog(); break;
           case 'help': this.openHelpGuide(); break;
           case 'close': this.close(); break;
+          case 'share-copy':     this.handleShareTarget('copy'); break;
+          case 'share-download': this.handleShareTarget('download'); break;
+          case 'share-twitter':  this.handleShareTarget('twitter'); break;
+          case 'share-whatsapp': this.handleShareTarget('whatsapp'); break;
+          case 'share-email':    this.handleShareTarget('email'); break;
           case 'compare': this.toggleCompare(); break;
           case 'download': this.handleDownload(); break;
           case 'share': this.handleShare(); break;
@@ -390,9 +445,11 @@
         const sku = s.getAttribute('data-size-sku');
         const size = this.state.selectedProduct.sizes.find((x) => x.sku === sku);
         if (!size || !size.inStock) return;
+        if (this.state.addToBagState === 'loading') return; // ignore size changes mid-add
         this.state.selectedSize = size;
         this.renderSheet();
         this.renderBar();
+        this.emit('size_select', { productId: this.state.selectedProduct.id, sku: size.sku });
       });
 
       // (peek→expand click handler removed — bar handles this now)
@@ -461,7 +518,13 @@
         start(e);
       });
       window.addEventListener('mousemove', drag);
-      window.addEventListener('touchmove', drag, { passive: true });
+      // passive:false — lets us preventDefault inside drag() so native page
+      // scroll doesn't fire while the user drags the compare slider on mobile.
+      window.addEventListener('touchmove', (e) => {
+        if (!dragging) return;
+        e.preventDefault();
+        drag(e);
+      }, { passive: false });
       window.addEventListener('mouseup', end);
       window.addEventListener('touchend', end);
 
@@ -549,8 +612,6 @@
         this.state.catalogLoading = false;
         this.renderCatalogChips();
         this.renderCatalogBody();
-        // Show search only for catalogs > 12
-        this.els.searchWrap.style.display = this.catalog.items.length > 12 ? 'flex' : 'none';
       }
     },
 
@@ -571,10 +632,12 @@
       this.emit('catalog_open', {});
     },
     closeCatalog() {
+      if (!this.state.catalogOpen) return;
       this.state.catalogOpen = false;
       this.els.catalogSheet.classList.remove('is-open');
       this.els.bar.classList.remove('is-dimmed');
       this.root.querySelector('[data-role="rail"]').classList.remove('is-dimmed');
+      this.emit('catalog_close', {});
     },
 
     renderCatalogChips() {
@@ -635,6 +698,7 @@
     // ---------- Photo upload flow ----------
     async handleUpload(file) {
       if (file.size > 10 * 1024 * 1024) {
+        this.emit('file_too_large', { size: file.size });
         this.showError({
           title: "This photo is too large",
           sub: "Please use a file under 10 MB, JPG or PNG.",
@@ -643,6 +707,9 @@
         });
         return;
       }
+      // If a try-on is in-flight, abort it so the new photo doesn't
+      // race a stale result back onto the slider.
+      if (this.state.isProcessing) this.cancelTryOn();
       this.emit('upload_start', { size: file.size });
       this.closeAllOverlays();
       // Stage the photo for confirmation; preview it on the canvas
@@ -671,6 +738,7 @@
       this.updateChromeVisibility();
       this.collapseSheet();
       this.renderBar();
+      this.emit('photo_confirm', {});
       this.emit('upload_complete', {});
       if (this.state.selectedProduct) {
         this.runTryOn();
@@ -687,6 +755,7 @@
       this.collapseSheet();
       this.updateEmptyState();
       this.updateChromeVisibility();
+      this.emit('photo_retake', {});
       this.els.fileInput.click();
     },
 
@@ -703,6 +772,7 @@
       this.state.resultImage = null;
       this.state.compareMode = false;
       this.els.slider.style.display = 'none';
+      this.els.slider.classList.remove('is-compare-off');
       this.els.after.removeAttribute('src');
       this.els.btnCompare.classList.remove('is-active');
       this.updateToolbarDisabled();
@@ -750,9 +820,9 @@
 
         this.state.resultImage = result.url;
         this.els.after.src = result.url;
-        // Default: compare OFF. Show the "after" full-bleed (slider at 0%).
-        // User taps the rail compare icon to engage the slider.
+        // Default: compare OFF. Show the "after" full-bleed. Slider chrome hidden.
         this.els.slider.style.display = 'block';
+        this.els.slider.classList.add('is-compare-off');
         this.state.sliderPos = 0;
         this.state.compareMode = false;
         this.els.btnCompare.classList.remove('is-active');
@@ -839,17 +909,13 @@
       this.els.btnCompare.classList.toggle('is-active', this.state.compareMode);
       this.els.btnCompare.innerHTML = this.state.compareMode ? icons.compare : icons.compareOff;
       this.els.btnCompare.setAttribute('aria-pressed', this.state.compareMode ? 'true' : 'false');
+      this.els.slider.style.display = 'block';
+      this.els.slider.classList.toggle('is-compare-off', !this.state.compareMode);
+      this.state.sliderPos = this.state.compareMode ? 50 : 0;
+      this.applySliderPosition();
       if (this.state.compareMode) {
-        this.els.slider.style.display = 'block';
-        this.state.sliderPos = 50;
-        this.applySliderPosition();
         this.showLabels();
         this.scheduleHideLabels();
-      } else {
-        // show only "after" full-bleed
-        this.els.slider.style.display = 'block';
-        this.state.sliderPos = 0;
-        this.applySliderPosition();
       }
       this.emit('compare_toggle', { on: this.state.compareMode });
     },
@@ -873,12 +939,15 @@
     async handleShare() {
       if (!this.state.resultImage) return;
       this.emit('share_start', {});
-      const title = this.state.selectedProduct ? this.state.selectedProduct.name : 'My try-on';
+      const p = this.state.selectedProduct;
+      const title = p ? p.name : 'My try-on';
+      const url = this.state.resultImage;
 
-      // 1) Try native share sheet with the actual IMAGE FILE (iOS + Android).
-      //    The OS chooses: Save to Photos / WhatsApp / Messages / Mail / Instagram / ...
+      // Try native share with the IMAGE FILE (iOS + Android Save-to-Photos,
+      // WhatsApp, Messages, Mail, Instagram, …). canShare gates it to mobile
+      // platforms — desktop browsers don't support file share.
       try {
-        const response = await fetch(this.state.resultImage, { mode: 'cors' });
+        const response = await fetch(url, { mode: 'cors' });
         if (response.ok) {
           const blob = await response.blob();
           const file = new File([blob], 'glamar-tryon.jpg', { type: blob.type || 'image/jpeg' });
@@ -889,27 +958,45 @@
             return;
           }
         }
-      } catch (e) { /* fall through to next strategy */ }
+      } catch (e) { /* user cancelled or unsupported — fall through */ }
 
-      // 2) Fall back to sharing the URL (desktop/web share without files).
-      if (navigator.share) {
+      // Desktop / no file support → open the mini share menu.
+      this.openShareMenu({ title, url });
+    },
+
+    openShareMenu({ title, url }) {
+      this.closeAllOverlays({ keepSheet: true });
+      this._shareCtx = { title, url };
+      this.state.sheetMode = 'share';
+      this.renderSheet();
+      this.els.sheet.classList.add('is-open', 'is-expanded');
+      this.emit('share_menu_open', {});
+    },
+
+    handleShareTarget(target) {
+      const ctx = this._shareCtx || {};
+      if (target === 'copy') {
         try {
-          await navigator.share({ title, url: this.state.resultImage });
-          this.showToast('Shared', { top: true, success: true });
-          this.emit('share', { type: 'native-url' });
-          return;
-        } catch (e) { /* user cancelled or unsupported */ }
+          navigator.clipboard.writeText(ctx.url || '');
+          this.collapseSheet();
+          this.showToast('Link copied', { top: true, success: true });
+          this.emit('share', { type: 'copy' });
+        } catch (e) {
+          this.showToast('Unable to copy', { top: true, danger: true });
+          this.emit('share_error', { type: 'copy' });
+        }
+        return;
       }
-
-      // 3) Final fallback — copy the link to clipboard.
-      try {
-        await navigator.clipboard.writeText(this.state.resultImage);
-        this.showToast('Link copied', { top: true, success: true });
-        this.emit('share', { type: 'copy' });
-      } catch (e) {
-        this.showToast('Unable to share — please try again.', { top: true, danger: true });
-        this.emit('share_error', {});
+      if (target === 'download') {
+        this.handleDownload();
+        this.collapseSheet();
+        this.emit('share', { type: 'download' });
+        return;
       }
+      // For link-based targets (twitter/whatsapp/email), the anchor tag's
+      // href opens the platform. We close the sheet + emit.
+      this.collapseSheet();
+      this.emit('share', { type: target });
     },
 
     // ---------- Add to Bag ----------
@@ -939,6 +1026,7 @@
         this.state.addToBagState = 'idle';
         this.renderBar(); this.renderSheet();
         this.showToast('Unable to add to bag — please try again.', { top: true, danger: true });
+        this.emit('add_to_cart_error', { message: err && err.message });
       }
     },
 
@@ -968,13 +1056,20 @@
         <span class="gvto-price-now">${formatPrice(p.price, p.currency)}</span>
         ${p.priceCompareAt ? `<span class="gvto-price-was">${formatPrice(p.priceCompareAt, p.currency)}</span>` : ''}
       `;
-      let addLabel, addAction = 'add-to-bag', addClass = '';
+      let addLabel, addAction = 'add-to-bag', addClass = '', addAria = 'Add to Bag';
       if (btnState === 'loading') {
         addLabel = `<span class="gvto-btn-spin" aria-hidden="true"></span>`;
+        addAria = 'Adding to Bag';
       } else if (btnState === 'success') {
         addClass = 'is-success';
-        if (this.state.bagUrl) { addLabel = `${icons.check}<span class="gvto-bar-add-text">View Bag</span>`; addAction = 'view-bag'; }
-        else { addLabel = `${icons.check}<span class="gvto-bar-add-text">Added</span>`; }
+        if (this.state.bagUrl) {
+          addLabel = `${icons.check}<span class="gvto-bar-add-text">View Bag</span>`;
+          addAction = 'view-bag';
+          addAria = 'View Bag';
+        } else {
+          addLabel = `${icons.check}<span class="gvto-bar-add-text">Added to Bag</span>`;
+          addAria = 'Added to Bag';
+        }
       } else {
         addLabel = `${icons.bag}<span class="gvto-bar-add-text">Add to Bag</span>`;
       }
@@ -982,7 +1077,7 @@
       this.els.bar.setAttribute('data-mode', 'product');
       this.els.barBody.innerHTML = `
         <button class="gvto-bar-float" data-action="open-catalog" aria-label="Try another style">
-          ${icons.hanger}<span>Try another</span>
+          ${icons.hanger}<span>Try another style</span>
         </button>
         <div class="gvto-bar-card">
           <button class="gvto-bar-product" data-action="expand-sheet" aria-label="Product details">
@@ -992,7 +1087,7 @@
               <div class="gvto-product-price">${priceBlock}</div>
             </div>
           </button>
-          <button class="gvto-btn ${addClass} gvto-bar-add" data-action="${addAction}" ${!sz || btnState==='loading' ? 'disabled' : ''}>${addLabel}</button>
+          <button class="gvto-btn ${addClass} gvto-bar-add" data-action="${addAction}" aria-label="${addAria}" ${!sz || btnState==='loading' ? 'disabled' : ''}>${addLabel}</button>
         </div>
       `;
     },
@@ -1036,9 +1131,47 @@
         this.els.sheetBody.innerHTML = this.tplHelpGuide();
       } else if (this.state.sheetMode === 'photo-confirm') {
         this.els.sheetBody.innerHTML = this.tplPhotoConfirm();
+      } else if (this.state.sheetMode === 'share') {
+        this.els.sheetBody.innerHTML = this.tplShareMenu();
       } else {
         this.els.sheetBody.innerHTML = '';
       }
+    },
+
+    tplShareMenu() {
+      const ctx = this._shareCtx || {};
+      const text = encodeURIComponent(ctx.title || 'My try-on');
+      const link = encodeURIComponent(ctx.url || '');
+      const twitter  = `https://twitter.com/intent/tweet?url=${link}&text=${text}`;
+      const whatsapp = `https://wa.me/?text=${encodeURIComponent((ctx.title || 'My try-on') + ' ' + (ctx.url || ''))}`;
+      const email    = `mailto:?subject=${text}&body=${encodeURIComponent((ctx.title || '') + '\n\n' + (ctx.url || ''))}`;
+      return `
+        <div class="gvto-share">
+          <div class="gvto-share-title">Share your look</div>
+          <div class="gvto-share-grid">
+            <button class="gvto-share-item" data-action="share-copy" aria-label="Copy link">
+              <span class="gvto-share-icon">${icons.copy}</span>
+              <span class="gvto-share-label">Copy link</span>
+            </button>
+            <button class="gvto-share-item" data-action="share-download" aria-label="Download image">
+              <span class="gvto-share-icon">${icons.download}</span>
+              <span class="gvto-share-label">Download</span>
+            </button>
+            <a class="gvto-share-item" href="${twitter}" target="_blank" rel="noopener" data-action="share-twitter" aria-label="Share on X">
+              <span class="gvto-share-icon">${icons.twitterX}</span>
+              <span class="gvto-share-label">X</span>
+            </a>
+            <a class="gvto-share-item" href="${whatsapp}" target="_blank" rel="noopener" data-action="share-whatsapp" aria-label="Share on WhatsApp">
+              <span class="gvto-share-icon">${icons.whatsapp}</span>
+              <span class="gvto-share-label">WhatsApp</span>
+            </a>
+            <a class="gvto-share-item" href="${email}" data-action="share-email" aria-label="Share via Email">
+              <span class="gvto-share-icon">${icons.email}</span>
+              <span class="gvto-share-label">Email</span>
+            </a>
+          </div>
+        </div>
+      `;
     },
 
     tplPhotoConfirm() {
@@ -1066,11 +1199,11 @@
       const addLabel = btnState === 'loading'
         ? `<div class="gvto-spinner" style="width:18px;height:18px;border-width:2px;border-top-color:#fff;"></div>`
         : btnState === 'success'
-          ? `${icons.check}<span>Added to bag</span>`
+          ? `${icons.check}<span>Added to Bag</span>`
           : `<span>Add to Bag</span>`;
       const addClass = btnState === 'success' ? 'is-success' : '';
       const viewBagRow = btnState === 'success' && this.state.bagUrl
-        ? `<button class="gvto-btn is-ghost is-full" data-action="view-bag" style="margin-top:8px;height:44px;">View bag</button>`
+        ? `<button class="gvto-btn is-ghost is-full" data-action="view-bag" style="margin-top:8px;height:44px;">View Bag</button>`
         : '';
       const sizes = (p.sizes || []).map((s) => `
         <button class="gvto-size-chip ${sz && s.sku === sz.sku ? 'is-selected' : ''} ${s.inStock ? '' : 'is-oos'}" data-size-sku="${s.sku}">${escapeHtml(s.label)}</button>
@@ -1137,28 +1270,39 @@
 
     showError({ title, sub, retryLabel, onRetry, secondaryLabel, onSecondary }) {
       const actionId = 'retry-' + Date.now().toString(36);
-      const secId = 'sec-' + Date.now().toString(36);
+      const secId    = 'sec-'   + Date.now().toString(36);
       this._errorHandlers = {};
       this._errorHandlers[actionId] = onRetry || (() => {});
       if (onSecondary) this._errorHandlers[secId] = onSecondary;
       this.state.error = { title, sub, retryLabel, action: actionId, secondaryLabel, secondaryAction: secId };
+
+      // Tear down any previous handler before mounting a new one. No once:true —
+      // a misclick shouldn't consume the listener before the actual action hits.
+      if (this._errorHandlerBound) {
+        this.els.bar.removeEventListener('click', this._errorHandlerBound);
+      }
       const handler = (e) => {
         const t = e.target.closest('[data-action]');
         if (!t) return;
         const a = t.getAttribute('data-action');
         if (this._errorHandlers[a]) {
           e.stopPropagation();
+          const fn = this._errorHandlers[a];
           this.clearError();
-          this._errorHandlers[a]();
+          fn();
         }
       };
-      this.els.bar.removeEventListener('click', this._errorHandlerBound || (() => {}));
       this._errorHandlerBound = handler;
-      this.els.bar.addEventListener('click', handler, { once: true });
+      this.els.bar.addEventListener('click', handler);
       this.renderBar();
     },
 
     clearError() {
+      if (this._errorHandlerBound) {
+        this.els.bar.removeEventListener('click', this._errorHandlerBound);
+        this._errorHandlerBound = null;
+      }
+      this._errorHandlers = {};
       this.state.error = null;
       this.renderBar();
     },
@@ -1202,8 +1346,11 @@
 
   function formatPrice(minor, currency) {
     if (typeof minor !== 'number') return '';
-    const symbol = { INR: '₹', USD: '$', EUR: '€', GBP: '£' }[currency] || '';
-    return symbol + minor.toLocaleString('en-IN');
+    const LOCALES = { INR: 'en-IN', USD: 'en-US', EUR: 'en-GB', GBP: 'en-GB', JPY: 'ja-JP' };
+    const SYMBOLS = { INR: '₹',     USD: '$',     EUR: '€',     GBP: '£',     JPY: '¥' };
+    const locale = LOCALES[currency] || 'en-US';
+    const symbol = SYMBOLS[currency] || (currency ? currency + ' ' : '');
+    return symbol + minor.toLocaleString(locale);
   }
 
   function haptic(ms) {

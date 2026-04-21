@@ -59,80 +59,193 @@
   'use strict';
 
   // ---------- Demo catalog ----------
+  // Three real Indonesian fashion collections: Minimal, MOC, Manzone.
+  // Engineer: replace DEFAULT_* below with live merchant data from
+  // API.fetchCatalog, or feed it via GlamarVTO.init({ catalog, categories }).
   const DEFAULT_CATEGORIES = [
-    { id: 'all', label: 'All' },
-    { id: 'tops', label: 'Tops' },
-    { id: 'bottoms', label: 'Bottoms' },
-    { id: 'dresses', label: 'Dresses' },
-    { id: 'outerwear', label: 'Outerwear' },
-    { id: 'knitwear', label: 'Knitwear' },
-    { id: 'shoes', label: 'Shoes' },
+    { id: 'all',     label: 'All' },
+    { id: 'minimal', label: 'Minimal' },
+    { id: 'moc',     label: 'MOC' },
+    { id: 'manzone', label: 'Manzone' },
   ];
 
+  // Size presets per garment type (no live sizing data from the source sites)
+  const SIZES_WOMENS_CLOTHING = [
+    { label: 'XS', sku: '-xs', inStock: true },
+    { label: 'S',  sku: '-s',  inStock: true },
+    { label: 'M',  sku: '-m',  inStock: true },
+    { label: 'L',  sku: '-l',  inStock: true },
+    { label: 'XL', sku: '-xl', inStock: false },
+  ];
+  const SIZES_MENS_SHIRT = [
+    { label: 'S',  sku: '-s',  inStock: true },
+    { label: 'M',  sku: '-m',  inStock: true },
+    { label: 'L',  sku: '-l',  inStock: true },
+    { label: 'XL', sku: '-xl', inStock: true },
+  ];
+  const SIZES_TROUSERS = [
+    { label: '28', sku: '-28', inStock: true },
+    { label: '30', sku: '-30', inStock: true },
+    { label: '32', sku: '-32', inStock: true },
+    { label: '34', sku: '-34', inStock: false },
+  ];
+  const withSkuPrefix = (prefix, sizes) => sizes.map((s) => ({ ...s, sku: prefix + s.sku }));
+
   const DEFAULT_ITEMS = [
+    // —— Minimal (women's) ————————————————————————————————
     {
-      id: 'cardigan-beige', name: 'Relaxed-Fit Merino Wool Cardigan — Ivory',
-      categoryId: 'knitwear', price: 7499, priceCompareAt: 9999, currency: 'INR',
-      image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=600&h=750&fit=crop',
-      sizes: [{label:'XS',sku:'crd-xs',inStock:false},{label:'S',sku:'crd-s',inStock:true},{label:'M',sku:'crd-m',inStock:true},{label:'L',sku:'crd-l',inStock:true},{label:'XL',sku:'crd-xl',inStock:false}],
+      id: 'minimal-clove-dress-cengkeh-orange',
+      name: 'Clove Dress Motif Cengkeh — Orange Light',
+      categoryId: 'minimal', currency: 'IDR',
+      price: 550905, priceCompareAt: 579900,
+      image: 'https://cdn.shopify.com/s/files/1/0564/3337/7459/files/175781-minimal_2_feb_20262031.jpg?v=1776230552',
+      sizes: withSkuPrefix('mcd-cengkeh', SIZES_WOMENS_CLOTHING),
       stockStatus: 'in_stock',
-      tryOnAsset: 'https://images.unsplash.com/photo-1551803091-e20673f15770?w=1400&h=1867&fit=crop',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0564/3337/7459/files/175781-minimal_2_feb_20262031.jpg?v=1776230552',
     },
     {
-      id: 'leather-pants', name: 'High-Waist Cropped Leather Trousers',
-      categoryId: 'bottoms', price: 12999, currency: 'INR',
-      image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=600&h=750&fit=crop',
-      sizes: [{label:'26',sku:'lp-26',inStock:true},{label:'28',sku:'lp-28',inStock:true},{label:'30',sku:'lp-30',inStock:true},{label:'32',sku:'lp-32',inStock:false}],
+      id: 'minimal-selena-blus-floral-blue',
+      name: 'Selena Blus Satin Motif Floral — Blue',
+      categoryId: 'minimal', currency: 'IDR',
+      price: 341905, priceCompareAt: 359900,
+      image: 'https://cdn.shopify.com/s/files/1/0564/3337/7459/files/175710-minimal_2_feb_20260434.jpg?v=1773231649',
+      sizes: withSkuPrefix('msb-floral', SIZES_WOMENS_CLOTHING),
       stockStatus: 'in_stock',
-      tryOnAsset: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1400&h=1867&fit=crop',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0564/3337/7459/files/175710-minimal_2_feb_20260434.jpg?v=1773231649',
     },
     {
-      id: 'denim-jacket', name: 'Classic Washed Denim Trucker Jacket',
-      categoryId: 'outerwear', price: 5999, currency: 'INR',
-      image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&h=750&fit=crop',
-      sizes: [{label:'S',sku:'dj-s',inStock:true},{label:'M',sku:'dj-m',inStock:true},{label:'L',sku:'dj-l',inStock:false},{label:'XL',sku:'dj-xl',inStock:true}],
+      id: 'minimal-raline-blus-wrap-white',
+      name: 'Raline Blus Wrap Lengan Panjang — White',
+      categoryId: 'minimal', currency: 'IDR',
+      price: 341905, priceCompareAt: 359900,
+      image: 'https://cdn.shopify.com/s/files/1/0564/3337/7459/files/175760-minimal_2_feb_20261850.jpg?v=1773747234',
+      sizes: withSkuPrefix('mrb-wrap', SIZES_WOMENS_CLOTHING),
       stockStatus: 'in_stock',
-      tryOnAsset: 'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?w=1400&h=1867&fit=crop',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0564/3337/7459/files/175760-minimal_2_feb_20261850.jpg?v=1773747234',
     },
     {
-      id: 'tailored-blazer', name: 'Single-Breasted Wool Blend Tailored Blazer',
-      categoryId: 'outerwear', price: 14999, priceCompareAt: 19999, currency: 'INR',
-      image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&h=750&fit=crop',
-      sizes: [{label:'S',sku:'tb-s',inStock:true},{label:'M',sku:'tb-m',inStock:true},{label:'L',sku:'tb-l',inStock:true}],
-      stockStatus: 'low_stock',
-      tryOnAsset: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=1400&h=1867&fit=crop',
+      id: 'minimal-solva-dress-vneck-maroon',
+      name: 'Solva Dress Katun V-Neck — Maroon',
+      categoryId: 'minimal', currency: 'IDR',
+      price: 284905, priceCompareAt: 299900,
+      image: 'https://cdn.shopify.com/s/files/1/0564/3337/7459/files/175352-minimal_2_feb_20261012.jpg?v=1772691250',
+      sizes: withSkuPrefix('msd-vneck', SIZES_WOMENS_CLOTHING),
+      stockStatus: 'in_stock',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0564/3337/7459/files/175352-minimal_2_feb_20261012.jpg?v=1772691250',
     },
     {
-      id: 'white-tshirt', name: 'Essential Organic Cotton Crewneck Tee',
-      categoryId: 'tops', price: 1299, currency: 'INR',
-      image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=750&fit=crop',
-      sizes: [{label:'XS',sku:'tee-xs',inStock:true},{label:'S',sku:'tee-s',inStock:true},{label:'M',sku:'tee-m',inStock:true},{label:'L',sku:'tee-l',inStock:true},{label:'XL',sku:'tee-xl',inStock:true}],
+      id: 'minimal-ismaya-dress-batik-kawung-red',
+      name: 'Ismaya Dress Motif Batik Kawung — Red',
+      categoryId: 'minimal', currency: 'IDR',
+      price: 436905, priceCompareAt: 459900,
+      image: 'https://cdn.shopify.com/s/files/1/0564/3337/7459/files/174816-catalog_mn_oct0842.jpg?v=1762927505',
+      sizes: withSkuPrefix('mid-batik', SIZES_WOMENS_CLOTHING),
       stockStatus: 'in_stock',
-      tryOnAsset: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1400&h=1867&fit=crop',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0564/3337/7459/files/174816-catalog_mn_oct0842.jpg?v=1762927505',
+    },
+
+    // —— MOC ————————————————————————————————————————————————
+    {
+      id: 'moc-chobaz',
+      name: 'Chobaz',
+      categoryId: 'moc', currency: 'IDR',
+      price: 129000, priceCompareAt: 399900,
+      image: 'https://cdn.shopify.com/s/files/1/0595/3719/5184/products/1_cb68dc3c-39c4-49b8-987c-7b01345e11b0.jpg?v=1757572011',
+      sizes: withSkuPrefix('moc-chobaz', SIZES_MENS_SHIRT),
+      stockStatus: 'in_stock',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0595/3719/5184/products/1_cb68dc3c-39c4-49b8-987c-7b01345e11b0.jpg?v=1757572011',
     },
     {
-      id: 'midi-slip-dress', name: 'Bias-Cut Satin Midi Slip Dress',
-      categoryId: 'dresses', price: 4999, currency: 'INR',
-      image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600&h=750&fit=crop',
-      sizes: [{label:'XS',sku:'md-xs',inStock:false},{label:'S',sku:'md-s',inStock:true},{label:'M',sku:'md-m',inStock:true},{label:'L',sku:'md-l',inStock:true}],
+      id: 'moc-kemeja-brokio-olive',
+      name: 'Kemeja Lengan Pendek Brokio — Olive',
+      categoryId: 'moc', currency: 'IDR',
+      price: 199000, priceCompareAt: 449900,
+      image: 'https://cdn.shopify.com/s/files/1/0595/3719/5184/products/sg-11134201-23010-zlgb3rlmvomv00.jpg?v=1757570605',
+      sizes: withSkuPrefix('moc-brokio', SIZES_MENS_SHIRT),
       stockStatus: 'in_stock',
-      tryOnAsset: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1400&h=1867&fit=crop',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0595/3719/5184/products/sg-11134201-23010-zlgb3rlmvomv00.jpg?v=1757570605',
     },
     {
-      id: 'strap-heels', name: 'Sculpted Strap Leather Heels',
-      categoryId: 'shoes', price: 8999, currency: 'INR',
-      image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600&h=750&fit=crop',
-      sizes: [{label:'36',sku:'sh-36',inStock:true},{label:'37',sku:'sh-37',inStock:true},{label:'38',sku:'sh-38',inStock:true},{label:'39',sku:'sh-39',inStock:false},{label:'40',sku:'sh-40',inStock:true}],
+      id: 'moc-krocce',
+      name: 'Krocce',
+      categoryId: 'moc', currency: 'IDR',
+      price: 179000, priceCompareAt: 439900,
+      image: 'https://cdn.shopify.com/s/files/1/0595/3719/5184/products/2638103-4274-3018362-1.jpg?v=1757571957',
+      sizes: withSkuPrefix('moc-krocce', SIZES_MENS_SHIRT),
       stockStatus: 'in_stock',
-      tryOnAsset: 'https://images.unsplash.com/photo-1518049362265-d5b2a6467637?w=1400&h=1867&fit=crop',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0595/3719/5184/products/2638103-4274-3018362-1.jpg?v=1757571957',
     },
     {
-      id: 'wide-trousers', name: 'Pleated Wide-Leg Tencel Trousers',
-      categoryId: 'bottoms', price: 3499, currency: 'INR',
-      image: 'https://images.unsplash.com/photo-1548883354-94bcfe321cbb?w=600&h=750&fit=crop',
-      sizes: [{label:'26',sku:'wt-26',inStock:true},{label:'28',sku:'wt-28',inStock:true},{label:'30',sku:'wt-30',inStock:true},{label:'32',sku:'wt-32',inStock:true}],
+      id: 'moc-kemeja-koko-jafer-black',
+      name: 'Kemeja Koko Lengan Panjang Jafer — Black',
+      categoryId: 'moc', currency: 'IDR',
+      price: 267000, priceCompareAt: 469900,
+      image: 'https://cdn.shopify.com/s/files/1/0595/3719/5184/files/171755-1.jpg?v=1772701177',
+      sizes: withSkuPrefix('moc-jafer', SIZES_MENS_SHIRT),
       stockStatus: 'in_stock',
-      tryOnAsset: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1400&h=1867&fit=crop',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0595/3719/5184/files/171755-1.jpg?v=1772701177',
+    },
+    {
+      id: 'moc-chinos-jaco-light-grey',
+      name: 'Celana Panjang Chinos Jaco — Light Grey',
+      categoryId: 'moc', currency: 'IDR',
+      price: 329900, priceCompareAt: null,
+      image: 'https://cdn.shopify.com/s/files/1/0595/3719/5184/files/175132-1.jpg?v=1774504806',
+      sizes: withSkuPrefix('moc-jaco', SIZES_TROUSERS),
+      stockStatus: 'in_stock',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0595/3719/5184/files/175132-1.jpg?v=1774504806',
+    },
+
+    // —— Manzone (men's) —————————————————————————————————————
+    {
+      id: 'manzone-koko-saeed-white',
+      name: 'Kemeja Koko Lengan Pendek Saeed Comfort Fit — White',
+      categoryId: 'manzone', currency: 'IDR',
+      price: 199900, priceCompareAt: 459900,
+      image: 'https://cdn.shopify.com/s/files/1/0563/3848/1313/files/171280-depan_460fb895-7ddf-48d1-9760-67b59b733c9c.jpg?v=1757481491',
+      sizes: withSkuPrefix('mz-saeed', SIZES_MENS_SHIRT),
+      stockStatus: 'in_stock',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0563/3848/1313/files/171280-depan_460fb895-7ddf-48d1-9760-67b59b733c9c.jpg?v=1757481491',
+    },
+    {
+      id: 'manzone-batik-damar-04-black',
+      name: 'Kemeja Batik Lengan Pendek Damar 04 Comfort Fit — Black',
+      categoryId: 'manzone', currency: 'IDR',
+      price: 259900, priceCompareAt: null,
+      image: 'https://cdn.shopify.com/s/files/1/0563/3848/1313/files/175763-1_depan.jpg?v=1775644983',
+      sizes: withSkuPrefix('mz-damar', SIZES_MENS_SHIRT),
+      stockStatus: 'in_stock',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0563/3848/1313/files/175763-1_depan.jpg?v=1775644983',
+    },
+    {
+      id: 'manzone-amiri-celana-ornament-beige',
+      name: 'Amiri Celana Lurus Motif Ornament — Beige',
+      categoryId: 'manzone', currency: 'IDR',
+      price: 311952, priceCompareAt: 649900,
+      image: 'https://cdn.shopify.com/s/files/1/0563/3848/1313/files/CatalogMM19december10603.jpg?v=1769578919',
+      sizes: withSkuPrefix('mz-amiri', SIZES_TROUSERS),
+      stockStatus: 'in_stock',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0563/3848/1313/files/CatalogMM19december10603.jpg?v=1769578919',
+    },
+    {
+      id: 'manzone-denim-kmell-1-black',
+      name: 'Celana Panjang Denim Kmell 1 Slim Fit — Black',
+      categoryId: 'manzone', currency: 'IDR',
+      price: 275940, priceCompareAt: null,
+      image: 'https://cdn.shopify.com/s/files/1/0563/3848/1313/files/171210-1_depan_762x1100_cacbd98b-7315-4644-9a4e-0f1a85b05b4a.jpg?v=1760527526',
+      sizes: withSkuPrefix('mz-kmell', SIZES_TROUSERS),
+      stockStatus: 'in_stock',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0563/3848/1313/files/171210-1_depan_762x1100_cacbd98b-7315-4644-9a4e-0f1a85b05b4a.jpg?v=1760527526',
+    },
+    {
+      id: 'manzone-chinos-menno-3-navy',
+      name: 'Celana Panjang Chinos Regular Fit Menno 3 — Navy',
+      categoryId: 'manzone', currency: 'IDR',
+      price: 149900, priceCompareAt: 299900,
+      image: 'https://cdn.shopify.com/s/files/1/0563/3848/1313/files/170961-depan.jpg?v=1760344397',
+      sizes: withSkuPrefix('mz-menno', SIZES_TROUSERS),
+      stockStatus: 'in_stock',
+      tryOnAsset: 'https://cdn.shopify.com/s/files/1/0563/3848/1313/files/170961-depan.jpg?v=1760344397',
     },
   ];
 
@@ -1398,6 +1511,16 @@
     /**
      * POST {apiBaseUrl}/tryon  (body: { photoId, productId, size })
      * → { jobId }; then poll GET {apiBaseUrl}/tryon/:jobId → { status, url }
+     *
+     * Expected behaviour in production:
+     *   Input:  the USER's photo + the selected product + size.
+     *   Output: a composite image URL of the USER wearing the GARMENT.
+     *
+     * Demo behaviour (this stub):
+     *   Returns `product.tryOnAsset` (the product's own photo) as a
+     *   placeholder so the slider has something to compare against. In
+     *   production this must be replaced with the real try-on result URL —
+     *   do NOT keep this stub behaviour.
      */
     async generateTryOn({ photo, product, size, config }) {
       await sleep(1800 + Math.random() * 1200);

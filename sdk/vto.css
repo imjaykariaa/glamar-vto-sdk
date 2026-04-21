@@ -618,8 +618,10 @@
 }
 .gvto-bar .gvto-product-price { font-size: 12px; font-weight: 500; color: var(--gvto-text-2); gap: 5px; }
 .gvto-bar .gvto-price-was { font-size: 12px; }
-.gvto-bar-add {
-  width: 44px;                       /* mobile: icon-only square pill */
+/* Mobile bag button: compound selector to win specificity over .gvto-btn below.
+ * Icon-only on mobile so the product name gets the horizontal room. */
+.gvto-btn.gvto-bar-add {
+  width: 44px;
   height: 44px;
   padding: 0;
   border-radius: var(--gvto-r-pill);
@@ -629,7 +631,7 @@
   flex-shrink: 0;
   gap: 0;
 }
-.gvto-bar-add svg { width: 20px; height: 20px; stroke-width: 2; }
+.gvto-btn.gvto-bar-add svg { width: 22px; height: 22px; }
 .gvto-bar-add-text { display: none; }  /* hidden on mobile — frees up room for product name */
 .gvto-btn-spin {
   width: 16px;
@@ -1655,8 +1657,8 @@
   .gvto-bar-card { padding: 6px 6px 6px 10px; }
   .gvto-bar-thumb { width: 36px; height: 44px; }
   /* Desktop: show the "Add to Bag" label (mobile is icon-only) */
-  .gvto-bar-add { width: auto; height: 44px; padding: 0 18px; font-size: 13px; flex: 0 0 auto; gap: 8px; }
-  .gvto-bar-add svg { width: 18px; height: 18px; stroke-width: 2; }
+  .gvto-btn.gvto-bar-add { width: auto; height: 44px; padding: 0 18px; font-size: 13px; flex: 0 0 auto; gap: 8px; }
+  .gvto-btn.gvto-bar-add svg { width: 18px; height: 18px; }
   .gvto-bar-add-text { display: inline; }
   /* Desktop: single-line product name, truncate with ellipsis */
   .gvto-bar-name { -webkit-line-clamp: 1; }

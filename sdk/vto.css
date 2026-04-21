@@ -1,0 +1,1673 @@
+/* ==========================================================================
+ * GlamAR Fashion VTO — Design System
+ * --------------------------------------------------------------------------
+ * Apple/iOS-inspired. Mobile-first. Premium fashion visual language.
+ * All tokens live as CSS custom properties prefixed with --gvto- so host
+ * sites can override without collision. All component styles are scoped to
+ * .gvto-app.
+ *
+ * Contents:
+ *   1. Colour        — canvas, surfaces, fills, text, brand, state
+ *   2. Typography    — one family, seven sizes, three weights
+ *   3. Spacing       — 4pt grid
+ *   4. Radius        — seven-step scale, from chip to pill
+ *   5. Elevation     — six shadow tiers
+ *   6. Motion        — four durations + one primary curve
+ *   7. Blur (glass)  — four depths of frosted glass
+ *   8. Control sizes — from 36px chip to 52px CTA
+ *   9. Z-index       — stacking scale
+ *
+ * Icon primitive:
+ *   All inline SVG icons share:
+ *     viewBox="0 0 24 24", fill="none", stroke="currentColor",
+ *     stroke-width="1.75", stroke-linecap/linejoin="round".
+ *   Rendered at 16 / 18 / 20 / 24 px depending on context.
+ *
+ * Component rules (authoritative):
+ *   Primary CTA   — filled black pill (--gvto-primary), weight 500, letter-
+ *                   spacing 0.02em, height 48–52, radius --gvto-r-pill.
+ *   Secondary CTA — --gvto-fill-3 pill, text --gvto-text-1.
+ *   Ghost CTA     — transparent, text only, --gvto-text-1.
+ *   Pill chips    — height 34 / 40 / 44, radius --gvto-r-pill, border-hairline
+ *                   or fill-3 bg.
+ *   Cards         — --gvto-surface, radius --gvto-r-5, shadow --gvto-e-2.
+ *   Sheets        — --gvto-surface, radius --gvto-r-5 top, shadow --gvto-e-5.
+ *   Modals        — --gvto-surface, radius --gvto-r-6, shadow --gvto-e-6.
+ *   Rail icons    — 42px glass disc, --gvto-blur-md, shadow --gvto-e-3.
+ *
+ * Motion rules:
+ *   Press feedback  — transform: scale(0.98), --gvto-d-fast, linear.
+ *   State change    — --gvto-d-std, --gvto-ease.
+ *   Sheet/panel     — --gvto-d-sheet, --gvto-ease.
+ *   Image crossfade — opacity over --gvto-d-std, --gvto-ease.
+ *
+ * Accessibility baseline:
+ *   - Touch targets ≥ 44×44 on interactive controls.
+ *   - Focus visible via box-shadow ring on --gvto-slider-handle & other
+ *     keyboard-reachable controls.
+ *   - All icons pair with aria-label on their button.
+ * ========================================================================== */
+
+:root {
+  /* ====== 1. Colour ====== */
+  /* Surfaces (backgrounds) */
+  --gvto-canvas:        #EFEFF2;             /* app chrome / showcase ground */
+  --gvto-stage:         #FAFAFA;             /* default canvas/stage bg */
+  --gvto-surface:       #FFFFFF;             /* cards, panels, modals */
+  --gvto-surface-alt:   #F5F5F7;             /* subdued (catalog thumbs, bar fill) */
+  --gvto-surface-glass: rgba(255, 255, 255, 0.70); /* frosted-glass overlays */
+
+  /* Hairlines & fills */
+  --gvto-hairline:  rgba(0, 0, 0, 0.06);
+  --gvto-separator: rgba(0, 0, 0, 0.08);
+  --gvto-fill-1:    rgba(0, 0, 0, 0.04);
+  --gvto-fill-2:    rgba(0, 0, 0, 0.06);
+  --gvto-fill-3:    rgba(0, 0, 0, 0.05);     /* default "soft fill" */
+  --gvto-fill-4:    rgba(0, 0, 0, 0.08);
+
+  /* Text */
+  --gvto-text-1:   #0A0A0A;                  /* primary — headlines, body */
+  --gvto-text-2:   #5A5A5E;                  /* secondary — subcopy */
+  --gvto-text-3:   #8E8E93;                  /* tertiary — hints, placeholders */
+  --gvto-text-inv: #FFFFFF;                  /* on dark */
+  --gvto-text:     var(--gvto-text-1);       /* semantic default */
+
+  /* Brand & state */
+  --gvto-primary:        #0A0A0A;            /* the black pill — primary CTA */
+  --gvto-primary-hover:  #000000;
+  --gvto-accent:         #0A84FF;            /* iOS blue — links only, NEVER CTA */
+  --gvto-success:        #30D158;
+  --gvto-danger:         #FF453A;
+  --gvto-destructive:    var(--gvto-danger); /* legacy alias */
+
+  /* ====== 2. Typography ====== */
+  --gvto-font: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', sans-serif;
+
+  /* Sizes / line heights */
+  --gvto-fs-display:  28px;  --gvto-lh-display:  34px;   /* hero headlines */
+  --gvto-fs-title:    22px;  --gvto-lh-title:    28px;   /* sheet titles */
+  --gvto-fs-headline: 17px;  --gvto-lh-headline: 22px;   /* confirm copy */
+  --gvto-fs-body:     15px;  --gvto-lh-body:     20px;   /* default body */
+  --gvto-fs-callout:  14px;  --gvto-lh-callout:  18px;   /* secondary */
+  --gvto-fs-foot:     13px;  --gvto-lh-foot:     16px;   /* footnotes, chips */
+  --gvto-fs-caption:  12px;  --gvto-lh-caption:  14px;   /* metadata */
+
+  /* Weights */
+  --gvto-fw-regular:  400;
+  --gvto-fw-medium:   500;
+  --gvto-fw-semibold: 600;
+
+  /* Letter-spacing (tracking) — Apple-style tighter on larger type */
+  --gvto-tracking-display: -0.02em;
+  --gvto-tracking-title:   -0.015em;
+  --gvto-tracking-body:    -0.01em;
+  --gvto-tracking-tight:   -0.005em;
+  --gvto-tracking-wide:     0.02em;            /* CTAs */
+
+  /* ====== 3. Spacing (4pt grid) ====== */
+  --gvto-s-1:  4px;
+  --gvto-s-2:  8px;
+  --gvto-s-3:  12px;
+  --gvto-s-4:  16px;
+  --gvto-s-5:  20px;
+  --gvto-s-6:  24px;
+  --gvto-s-7:  32px;
+  --gvto-s-8:  40px;
+  --gvto-s-9:  48px;
+
+  /* ====== 4. Radius ====== */
+  --gvto-r-1:    6px;     /* tiny — sizechip, thumbnail ornament */
+  --gvto-r-2:    10px;    /* product thumb, small thumb */
+  --gvto-r-3:    14px;    /* input fields, size chip */
+  --gvto-r-4:    16px;    /* chips, small cards */
+  --gvto-r-5:    20px;    /* cards, sheets */
+  --gvto-r-6:    24px;    /* panels, modals */
+  --gvto-r-pill: 999px;   /* full pill */
+
+  /* ====== 5. Elevation (shadows) ====== */
+  --gvto-e-1: 0 1px 2px rgba(0, 0, 0, 0.04);                                      /* hairline separation */
+  --gvto-e-2: 0 2px 8px rgba(0, 0, 0, 0.06);                                      /* card */
+  --gvto-e-3: 0 4px 18px rgba(0, 0, 0, 0.08);                                     /* floating pill */
+  --gvto-e-4: 0 6px 20px rgba(0, 0, 0, 0.18);                                     /* primary CTA lift */
+  --gvto-e-5: 0 1px 2px rgba(0, 0, 0, 0.04), 0 20px 60px rgba(0, 0, 0, 0.10);     /* sheet/panel */
+  --gvto-e-6: 0 1px 2px rgba(0, 0, 0, 0.04), 0 32px 80px rgba(0, 0, 0, 0.14);     /* centered modal, stage */
+
+  /* Legacy aliases */
+  --gvto-shadow-card:  var(--gvto-e-2);
+  --gvto-shadow-sheet: var(--gvto-e-5);
+
+  /* ====== 6. Motion ====== */
+  --gvto-ease:     cubic-bezier(0.22, 1, 0.36, 1);  /* primary — "quart out" */
+  --gvto-ease-out: cubic-bezier(0, 0, 0.2, 1);      /* deceleration */
+
+  --gvto-d-fast:  120ms;   /* press, hover */
+  --gvto-d-std:   220ms;   /* state, colour */
+  --gvto-d-slow:  320ms;   /* reveals */
+  --gvto-d-sheet: 360ms;   /* sheet/panel slide */
+
+  /* ====== 7. Blur (frosted glass) ====== */
+  --gvto-blur-sm: blur(12px) saturate(180%);   /* scrim */
+  --gvto-blur-md: blur(20px) saturate(180%);   /* rail pills, bar */
+  --gvto-blur-lg: blur(28px) saturate(180%);   /* sheets */
+  --gvto-blur-xl: blur(40px) saturate(180%);   /* toolbars (legacy) */
+
+  /* ====== 8. Control sizes ====== */
+  --gvto-ctl-sm:  36px;    /* catalog floating pill, chips */
+  --gvto-ctl-md:  40px;    /* rail-ish, pills */
+  --gvto-ctl-lg:  44px;    /* HIG touch target min */
+  --gvto-ctl-xl:  48px;    /* prominent secondary */
+  --gvto-ctl-2xl: 52px;    /* primary CTA */
+
+  /* ====== 9. Z-index scale ====== */
+  --gvto-z-canvas:     1;
+  --gvto-z-empty:      2;
+  --gvto-z-rail:      10;
+  --gvto-z-bar:       12;
+  --gvto-z-coach:     14;
+  --gvto-z-processing:15;
+  --gvto-z-sheet:     20;
+  --gvto-z-catalog:   20;
+  --gvto-z-toast:     40;
+}
+
+.gvto-app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  background: var(--gvto-canvas);
+  color: var(--gvto-text);
+  font-family: var(--gvto-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  box-sizing: border-box;
+  letter-spacing: -0.01em;
+}
+.gvto-app *, .gvto-app *::before, .gvto-app *::after { box-sizing: border-box; }
+.gvto-app :where(button) { font-family: inherit; border: none; background: none; cursor: pointer; color: inherit; padding: 0; }
+
+/* ============ Canvas (image area) ============ */
+.gvto-canvas {
+  position: absolute;
+  inset: 0;
+  background: var(--gvto-canvas);
+  overflow: hidden;
+}
+.gvto-canvas-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: opacity 220ms var(--gvto-ease);
+}
+
+/* ============ Empty state — premium onboarding with examples ============ */
+.gvto-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px calc(env(safe-area-inset-bottom, 16px) + 24px);
+  z-index: 2;
+  background: var(--gvto-canvas);
+  overflow-y: auto;
+}
+.gvto-empty-card {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 32px 24px;
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 24px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 40px rgba(0, 0, 0, 0.06);
+}
+.gvto-empty-headline {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 30px;
+  letter-spacing: -0.02em;
+  color: var(--gvto-text);
+  text-align: center;
+}
+.gvto-empty-sub {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--gvto-text-2);
+  text-align: center;
+  max-width: 300px;
+  margin-top: -12px;
+}
+.gvto-empty-examples {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  justify-content: center;
+}
+.gvto-empty-example {
+  width: 72px;
+  height: 104px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--gvto-fill-3);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  color: var(--gvto-text-3);
+  padding: 8px 4px 0;
+}
+.gvto-empty-example img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gvto-empty-example svg { width: 100%; height: 100%; color: var(--gvto-text-3); }
+.gvto-empty-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  align-items: flex-start;
+  padding: 0 4px;
+}
+.gvto-empty-tip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--gvto-text-2);
+  letter-spacing: -0.005em;
+}
+.gvto-empty-tip svg {
+  width: 16px;
+  height: 16px;
+  color: var(--gvto-success);
+  flex-shrink: 0;
+  stroke-width: 2.25;
+}
+.gvto-empty-cta {
+  width: 100%;
+  height: 52px;
+  border-radius: 999px;
+  background: var(--gvto-primary);
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: transform 120ms linear, background 220ms var(--gvto-ease);
+  margin-top: 4px;
+}
+.gvto-empty-cta:active { transform: scale(0.98); }
+.gvto-empty-cta:hover { background: var(--gvto-primary-hover); }
+.gvto-empty-hint { font-size: 12px; color: var(--gvto-text-3); }
+
+/* ============ Before/After slider ============ */
+.gvto-slider { position: absolute; inset: 0; pointer-events: none; }
+.gvto-slider-after-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  clip-path: inset(0 0 0 50%);
+  transition: clip-path 60ms linear;
+}
+.gvto-slider-after-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.gvto-slider-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.18);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.gvto-slider-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: ew-resize;
+  pointer-events: auto;
+  color: var(--gvto-text);
+  transition: transform 120ms linear, box-shadow 220ms var(--gvto-ease);
+  user-select: none;
+  outline: none;
+}
+.gvto-slider-handle:hover { transform: translate(-50%, -50%) scale(1.04); }
+.gvto-slider-handle:active { transform: translate(-50%, -50%) scale(0.96); }
+.gvto-slider-handle:focus-visible { box-shadow: 0 0 0 3px var(--gvto-accent), 0 2px 8px rgba(0, 0, 0, 0.18); }
+.gvto-slider-handle svg { width: 18px; height: 18px; }
+.gvto-slider-labels {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 220ms var(--gvto-ease);
+}
+.gvto-slider.is-idle .gvto-slider-labels { opacity: 0; }
+.gvto-slider.is-active .gvto-slider-labels { opacity: 1; }
+.gvto-slider-label {
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 14px;
+  border-radius: 100px;
+}
+
+/* Chrome visibility — progressive disclosure.
+ * Rail stays visible the whole time (greyed on empty state — .is-idle).
+ * Bar is hidden until photo is confirmed, then fades in.
+ */
+.gvto-bar.is-hidden { opacity: 0; pointer-events: none; transform: translateY(8px); }
+.gvto-rail, .gvto-bar { transition: opacity 320ms var(--gvto-ease), transform 320ms var(--gvto-ease); }
+/* On empty state the rail is still visible — individual button :disabled styles handle the greying. */
+
+/* Dim the bar and rail when a blocking overlay (catalog, processing) is active */
+.gvto-bar.is-dimmed,
+.gvto-rail.is-dimmed { opacity: 0; pointer-events: none; }
+
+/* ============ Left rail — 3 individual floating pills ============ */
+.gvto-rail {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 16px) + 16px);
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  z-index: var(--gvto-z-rail);
+}
+
+/* ============ Close button — dismiss the SDK ============ */
+.gvto-close-btn {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 16px) + 16px);
+  right: 16px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: var(--gvto-blur-md);
+  -webkit-backdrop-filter: var(--gvto-blur-md);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: var(--gvto-e-3);
+  z-index: var(--gvto-z-rail);
+  color: var(--gvto-text-1);
+  transition: background var(--gvto-d-std) var(--gvto-ease), transform var(--gvto-d-fast) linear;
+}
+.gvto-close-btn:hover { background: rgba(255, 255, 255, 0.82); }
+.gvto-close-btn:active { transform: scale(0.92); }
+.gvto-close-btn { color: var(--gvto-text-2); }
+.gvto-close-btn:hover { color: var(--gvto-text-1); }
+.gvto-close-btn svg { width: 20px; height: 20px; }
+.gvto-rail-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gvto-text);
+  background: rgba(255, 255, 255, 0.42);          /* lighter — product shows through */
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.35);    /* subtle rim instead of hard border */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  transition: background 220ms var(--gvto-ease), transform 120ms linear;
+}
+.gvto-rail-btn:not(:disabled):hover { background: rgba(255, 255, 255, 0.82); }
+.gvto-rail-btn:not(:disabled):active { transform: scale(0.92); }
+.gvto-rail-btn:disabled { opacity: 0.4; cursor: default; }
+.gvto-rail-btn.is-active { background: rgba(255, 255, 255, 0.82); }
+.gvto-rail-btn svg { width: 20px; height: 20px; stroke-width: 1.75; }
+
+/* ============ Floating bottom bar (compact) ============ */
+.gvto-bar {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: calc(env(safe-area-inset-bottom, 16px) + 16px);
+  z-index: 12;
+  animation: gvto-bar-in 320ms var(--gvto-ease);
+}
+@keyframes gvto-bar-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Empty mode — single big CTA, no shell */
+.gvto-bar[data-mode="empty"] .gvto-bar-body {
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.gvto-bar-cta {
+  width: 100%;
+  height: 52px;
+  border-radius: 999px;
+  background: var(--gvto-primary);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  transition: transform 120ms linear;
+}
+.gvto-bar-cta:active { transform: scale(0.98); }
+.gvto-bar-cta-arrow svg { width: 16px; height: 16px; }
+
+/* Product mode — floating hanger pill + single-row compact card
+ * Both surfaces are translucent / blurred so the try-on behind still reads.
+ */
+.gvto-bar[data-mode="product"] .gvto-bar-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.gvto-bar-float {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px 0 10px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 999px;
+  color: var(--gvto-text);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 120ms linear, background 220ms var(--gvto-ease);
+  white-space: nowrap;
+}
+.gvto-bar-float:hover { background: rgba(255, 255, 255, 0.96); }
+.gvto-bar-float:active { transform: scale(0.97); }
+.gvto-bar-float svg { width: 16px; height: 16px; color: var(--gvto-text); }
+
+.gvto-bar-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 10px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 999px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  min-height: 56px;
+}
+.gvto-bar-product {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px;
+  transition: transform 120ms linear;
+  text-align: left;
+}
+.gvto-bar-product:active { transform: scale(0.99); }
+.gvto-bar-thumb {
+  width: 36px;
+  height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--gvto-fill-3);
+}
+.gvto-bar-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.gvto-bar-name {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 17px;
+  letter-spacing: -0.01em;
+  color: var(--gvto-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;             /* mobile: show up to 2 lines */
+  -webkit-box-orient: vertical;
+}
+.gvto-bar .gvto-product-price { font-size: 12px; font-weight: 500; color: var(--gvto-text-2); gap: 5px; }
+.gvto-bar .gvto-price-was { font-size: 12px; }
+.gvto-bar-add {
+  width: 44px;                       /* mobile: icon-only square pill */
+  height: 44px;
+  padding: 0;
+  border-radius: var(--gvto-r-pill);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+  gap: 0;
+}
+.gvto-bar-add svg { width: 20px; height: 20px; stroke-width: 2; }
+.gvto-bar-add-text { display: none; }  /* hidden on mobile — frees up room for product name */
+.gvto-btn-spin {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  animation: gvto-spin 0.9s linear infinite;
+}
+@keyframes gvto-spin { to { transform: rotate(360deg); } }
+
+/* Error mode — tone down from loud red left-bar to subtle inline */
+.gvto-bar[data-mode="error"] .gvto-bar-body {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: block;
+  border: 1px solid rgba(255, 69, 58, 0.18);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+}
+.gvto-bar[data-mode="error"] .gvto-error { background: transparent; border-left: none; padding: 0; }
+.gvto-bar[data-mode="error"] .gvto-error-icon { color: var(--gvto-destructive); }
+.gvto-bar[data-mode="error"] .gvto-error-icon svg { width: 18px; height: 18px; }
+
+/* Narrow viewport — drop the thumb, let name/price carry */
+@media (max-width: 360px) {
+  .gvto-bar-thumb { display: none; }
+  .gvto-bar-alt span { display: none; }   /* icon-only alt button */
+  .gvto-bar-alt { flex: 0 0 44px; padding: 0; }
+}
+
+/* ============ Expanded sheet (size picker / help guide) ============ */
+.gvto-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #FFFFFF;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: var(--gvto-shadow-sheet);
+  padding: 8px 20px calc(env(safe-area-inset-bottom, 16px) + 20px);
+  transform: translateY(calc(100% + 12px));
+  transition: transform 360ms var(--gvto-ease);
+  z-index: 20;
+  max-height: 80vh;
+  overflow: hidden;
+}
+.gvto-sheet.is-open { transform: translateY(0); }
+.gvto-sheet.is-expanded { max-height: 80vh; }
+.gvto-grabber {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.18);
+  margin: 0 auto 16px;
+}
+.gvto-sheet-body { position: relative; }
+
+/* Product info — peek */
+.gvto-peek {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.gvto-peek-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+}
+.gvto-peek-thumb {
+  width: 56px;
+  height: 72px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--gvto-fill-3);
+}
+.gvto-peek-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.gvto-peek-body .gvto-product-name {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.01em;
+  color: var(--gvto-text);
+  -webkit-line-clamp: 2;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.gvto-peek-body .gvto-product-price {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gvto-text-2);
+}
+.gvto-peek-expand {
+  width: 32px;
+  height: 32px;
+  color: var(--gvto-text-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+}
+.gvto-peek-expand svg { width: 14px; height: 14px; }
+
+/* Product info — expanded (header row with larger thumb) */
+.gvto-product {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.gvto-product-thumb {
+  width: 56px;
+  height: 72px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--gvto-fill-3);
+}
+.gvto-product-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.gvto-product-name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--gvto-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+.gvto-sheet.is-expanded .gvto-product-name { -webkit-line-clamp: 3; }
+.gvto-product-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.gvto-price-now { color: var(--gvto-text); }
+.gvto-price-was { color: var(--gvto-text-3); text-decoration: line-through; font-weight: 400; }
+
+.gvto-btn {
+  height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 20px;
+  background: var(--gvto-primary);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 120ms linear, background 220ms var(--gvto-ease), opacity 220ms var(--gvto-ease);
+}
+.gvto-btn:not(:disabled):hover { background: var(--gvto-primary-hover); }
+.gvto-btn:active { transform: scale(0.98); }
+.gvto-btn:disabled { opacity: 0.35; cursor: default; }
+.gvto-btn.is-secondary { background: var(--gvto-fill-3); color: var(--gvto-text); }
+.gvto-btn.is-ghost { background: transparent; color: var(--gvto-text); padding: 0 14px; }
+.gvto-btn.is-success { background: var(--gvto-success); color: #fff; }
+.gvto-btn.is-full { width: 100%; }
+
+.gvto-cta-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.gvto-cta-size {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-left: 4px;
+}
+
+/* Product expanded extras */
+.gvto-expanded-extras {
+  display: none;
+  padding-top: 16px;
+  overflow-y: auto;
+  max-height: calc(80vh - 140px);
+}
+.gvto-sheet.is-expanded .gvto-expanded-extras { display: block; }
+
+.gvto-section-title {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--gvto-text-3);
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
+.gvto-sizes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.gvto-size-chip {
+  min-width: 44px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: var(--gvto-fill-3);
+  color: var(--gvto-text);
+  font-size: 15px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 220ms var(--gvto-ease), color 220ms var(--gvto-ease), transform 120ms linear;
+}
+.gvto-size-chip:active { transform: scale(0.96); }
+.gvto-size-chip.is-selected { background: var(--gvto-primary); color: #fff; }
+.gvto-size-chip.is-oos {
+  opacity: 0.36;
+  text-decoration: line-through;
+  pointer-events: none;
+}
+
+.gvto-row-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 4px;
+  color: var(--gvto-text);
+  font-size: 15px;
+  font-weight: 500;
+  border-top: 1px solid var(--gvto-separator);
+}
+.gvto-row-link svg { width: 14px; height: 14px; color: var(--gvto-text-3); }
+
+.gvto-add-full {
+  width: 100%;
+  height: 52px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.gvto-cta-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+.gvto-cta-alt {
+  width: 100%;
+  height: 48px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  gap: 8px;
+}
+.gvto-cta-alt svg { width: 16px; height: 16px; }
+
+/* Sheet header when expanded */
+.gvto-sheet-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--gvto-text-1);
+  background: var(--gvto-fill-3);
+  border-radius: 50%;
+  transition: background var(--gvto-d-std) var(--gvto-ease), transform var(--gvto-d-fast) linear;
+}
+.gvto-sheet-close:hover { background: var(--gvto-fill-4); }
+.gvto-sheet-close:active { transform: scale(0.94); }
+.gvto-sheet.is-expanded .gvto-sheet-close { display: flex; }
+.gvto-sheet-close svg { width: 16px; height: 16px; }
+
+/* Photo confirm variant */
+.gvto-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0 0;
+}
+.gvto-confirm-title { font-size: 17px; font-weight: 600; line-height: 22px; letter-spacing: -0.01em; }
+.gvto-confirm-sub { font-size: 14px; line-height: 20px; color: var(--gvto-text-2); }
+.gvto-confirm-actions { display: flex; gap: 10px; margin-top: 12px; }
+.gvto-confirm-actions .gvto-btn { flex: 1; height: 50px; }
+
+/* ============ Error states ============
+ *   Three sizes, one language. All use the same token set.
+ *     .gvto-error         — banner (default): compact card inline with flow
+ *     .gvto-error--inline — one-line field hint
+ *     .gvto-error--view   — full-state centered block (blocking)
+ *     .gvto-toast.is-danger — transient notice
+ */
+.gvto-error {
+  display: flex;
+  gap: var(--gvto-s-3);
+  padding: var(--gvto-s-3) var(--gvto-s-4);
+  background: var(--gvto-surface);
+  border: 1px solid rgba(255, 69, 58, 0.18);
+  border-radius: var(--gvto-r-4);
+  box-shadow: var(--gvto-e-2);
+}
+.gvto-error-icon {
+  color: var(--gvto-danger);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.gvto-error-icon svg { width: 20px; height: 20px; }
+.gvto-error-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.gvto-error-title {
+  font-size: var(--gvto-fs-body);
+  font-weight: var(--gvto-fw-semibold);
+  line-height: var(--gvto-lh-body);
+  letter-spacing: var(--gvto-tracking-body);
+  color: var(--gvto-text-1);
+}
+.gvto-error-sub {
+  font-size: var(--gvto-fs-foot);
+  line-height: var(--gvto-lh-foot);
+  color: var(--gvto-text-2);
+}
+.gvto-error-actions { display: flex; gap: var(--gvto-s-2); margin-top: var(--gvto-s-2); flex-wrap: wrap; }
+.gvto-error-actions .gvto-btn {
+  height: var(--gvto-ctl-sm);
+  padding: 0 var(--gvto-s-3);
+  font-size: var(--gvto-fs-foot);
+  border-radius: var(--gvto-r-3);
+}
+
+/* Inline — a field-level hint, text-only */
+.gvto-error--inline {
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  align-items: center;
+  gap: var(--gvto-s-2);
+}
+.gvto-error--inline .gvto-error-icon { margin: 0; }
+.gvto-error--inline .gvto-error-icon svg { width: 14px; height: 14px; }
+.gvto-error--inline .gvto-error-title {
+  font-size: var(--gvto-fs-foot);
+  font-weight: var(--gvto-fw-medium);
+  color: var(--gvto-danger);
+  line-height: var(--gvto-lh-foot);
+}
+.gvto-error--inline .gvto-error-body { flex-direction: row; align-items: center; gap: var(--gvto-s-2); }
+.gvto-error--inline .gvto-error-sub,
+.gvto-error--inline .gvto-error-actions { display: none; }
+
+/* View — full-state, centered, blocking */
+.gvto-error--view {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 360px;
+  padding: var(--gvto-s-8) var(--gvto-s-6);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  gap: var(--gvto-s-3);
+}
+.gvto-error--view .gvto-error-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--gvto-r-pill);
+  background: rgba(255, 69, 58, 0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 var(--gvto-s-2) 0;
+}
+.gvto-error--view .gvto-error-icon svg { width: 26px; height: 26px; }
+.gvto-error--view .gvto-error-title {
+  font-size: var(--gvto-fs-headline);
+  line-height: var(--gvto-lh-headline);
+  letter-spacing: var(--gvto-tracking-body);
+}
+.gvto-error--view .gvto-error-sub {
+  font-size: var(--gvto-fs-callout);
+  line-height: var(--gvto-lh-body);
+  color: var(--gvto-text-2);
+  max-width: 280px;
+}
+.gvto-error--view .gvto-error-body { align-items: center; text-align: center; gap: var(--gvto-s-1); }
+.gvto-error--view .gvto-error-actions {
+  margin-top: var(--gvto-s-5);
+  flex-direction: column;
+  width: 100%;
+  gap: var(--gvto-s-2);
+}
+.gvto-error--view .gvto-error-actions .gvto-btn {
+  width: 100%;
+  height: var(--gvto-ctl-lg);
+  border-radius: var(--gvto-r-pill);
+  font-size: var(--gvto-fs-body);
+  padding: 0 var(--gvto-s-5);
+}
+
+/* Danger toast — transient, bottom-floating */
+.gvto-toast.is-danger {
+  background: var(--gvto-danger);
+  color: var(--gvto-text-inv);
+}
+
+/* ============ Help guide (inside expanded sheet) ============ */
+.gvto-guide { display: flex; flex-direction: column; gap: 4px; padding: 4px 0 8px; }
+.gvto-guide-title {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: -0.02em;
+  color: var(--gvto-text);
+}
+.gvto-guide-sub {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--gvto-text-2);
+  margin-bottom: 16px;
+}
+.gvto-guide-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 12px;
+  max-height: 52vh;
+  overflow-y: auto;
+}
+.gvto-guide-step {
+  display: flex;
+  gap: 14px;
+  padding: 12px;
+  background: var(--gvto-fill-3);
+  border-radius: 14px;
+}
+.gvto-guide-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--gvto-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.gvto-guide-icon svg { width: 20px; height: 20px; }
+.gvto-guide-text { display: flex; flex-direction: column; gap: 2px; }
+.gvto-guide-step-title { font-size: 15px; font-weight: 600; line-height: 20px; letter-spacing: -0.01em; }
+.gvto-guide-step-sub { font-size: 13px; line-height: 18px; color: var(--gvto-text-2); }
+.gvto-guide-done { margin-top: 8px; height: 52px; }
+
+/* ============ Processing state — editorial, luxury tier ============
+ * Inspired by light on silk. A single soft gradient sheen passes diagonally
+ * across the image at a slow, deliberate pace. The status card is minimal —
+ * three typographic dots and a stage label. No spinner, no hard lines.
+ */
+.gvto-processing {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--gvto-s-4);
+  z-index: var(--gvto-z-processing);
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity var(--gvto-d-slow) var(--gvto-ease);
+}
+.gvto-processing.is-active { opacity: 1; pointer-events: auto; }
+
+/* Cinematic depth — heavy blur + soft dim on the photo. No animation on
+ * the photo itself: the card carries all the activity. */
+.gvto-processing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.32);
+  backdrop-filter: blur(18px) saturate(110%);
+  -webkit-backdrop-filter: blur(18px) saturate(110%);
+  pointer-events: none;
+}
+
+/* Scan-line element retained for DOM compat but rendered as a no-op */
+.gvto-scan-line { display: none; }
+
+/* Editorial status card — tight typography, restrained chrome.
+ * Fixed width so the card does not resize as stage copy changes. */
+.gvto-proc-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gvto-s-3);
+  padding: var(--gvto-s-6) var(--gvto-s-7);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: var(--gvto-blur-lg);
+  -webkit-backdrop-filter: var(--gvto-blur-lg);
+  border: 1px solid var(--gvto-hairline);
+  border-radius: var(--gvto-r-5);
+  box-shadow: var(--gvto-e-5);
+  width: min(320px, calc(100% - 32px));
+  max-width: 320px;
+  text-align: center;
+}
+/* The stage line sits inside a fixed-height, fixed-width slot so the
+ * surrounding card never jumps as copy changes. */
+.gvto-proc-stage {
+  min-height: var(--gvto-lh-headline);
+  width: 100%;
+}
+
+/* Three typographic dots — the luxury's answer to a spinner */
+.gvto-proc-dots {
+  display: flex;
+  gap: 7px;
+  margin-bottom: var(--gvto-s-1);
+  height: 6px;
+  align-items: center;
+}
+.gvto-proc-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gvto-text-1);
+  opacity: 0.22;
+  animation: gvto-dots 1.4s ease-in-out infinite;
+}
+.gvto-proc-dots span:nth-child(2) { animation-delay: 0.18s; }
+.gvto-proc-dots span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes gvto-dots {
+  0%, 70%, 100% { opacity: 0.22; transform: translateY(0); }
+  35%           { opacity: 1;    transform: translateY(-3px); }
+}
+
+.gvto-proc-stage {
+  font-size: var(--gvto-fs-headline);
+  font-weight: var(--gvto-fw-semibold);
+  letter-spacing: var(--gvto-tracking-body);
+  color: var(--gvto-text-1);
+  line-height: var(--gvto-lh-headline);
+  transition: opacity var(--gvto-d-std) var(--gvto-ease);
+}
+.gvto-proc-hint {
+  font-size: var(--gvto-fs-caption);
+  font-weight: var(--gvto-fw-regular);
+  line-height: var(--gvto-lh-caption);
+  color: var(--gvto-text-3);
+}
+.gvto-proc-cancel {
+  margin-top: var(--gvto-s-2);
+  font-size: var(--gvto-fs-callout);
+  font-weight: var(--gvto-fw-medium);
+  color: var(--gvto-text-1);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 0.5px;
+  padding: var(--gvto-s-2) var(--gvto-s-3);
+}
+
+/* ============ Styles catalog (bottom-sheet on mobile) ============ */
+.gvto-catalog-sheet {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms var(--gvto-ease);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.gvto-catalog-sheet.is-open { opacity: 1; pointer-events: auto; }
+
+.gvto-catalog-panel {
+  width: 100%;
+  max-height: 85vh;
+  background: var(--gvto-surface);
+  border-top-left-radius: 22px;
+  border-top-right-radius: 22px;
+  box-shadow: var(--gvto-shadow-sheet);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(24px);
+  transition: transform 360ms var(--gvto-ease);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.gvto-catalog-sheet.is-open .gvto-catalog-panel { transform: translateY(0); }
+
+.gvto-catalog-head {
+  padding: 12px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex-shrink: 0;
+}
+.gvto-catalog-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+}
+.gvto-catalog-title {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 30px;
+}
+.gvto-catalog-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gvto-text-1);
+  background: var(--gvto-fill-3);
+  border-radius: 50%;
+  transition: background var(--gvto-d-std) var(--gvto-ease), transform var(--gvto-d-fast) linear;
+}
+.gvto-catalog-close:hover { background: var(--gvto-fill-4); }
+.gvto-catalog-close:active { transform: scale(0.94); }
+.gvto-catalog-close svg { width: 16px; height: 16px; }
+
+.gvto-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 12px;
+  background: var(--gvto-fill-3);
+  border-radius: 12px;
+}
+.gvto-search svg { width: 18px; height: 18px; color: var(--gvto-text-3); flex-shrink: 0; }
+.gvto-search input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--gvto-text);
+  padding: 0;
+}
+.gvto-search input::placeholder { color: var(--gvto-text-3); }
+
+.gvto-cat-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 0 0 2px;
+  scrollbar-width: none;
+  margin: 0 -20px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.gvto-cat-chips::-webkit-scrollbar { display: none; }
+.gvto-cat-chip {
+  padding: 0 14px;
+  height: 34px;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gvto-text-2);
+  white-space: nowrap;
+  transition: all 220ms var(--gvto-ease);
+  flex-shrink: 0;
+  letter-spacing: -0.005em;
+}
+.gvto-cat-chip.is-active { background: var(--gvto-primary); color: #fff; border-color: var(--gvto-primary); }
+
+.gvto-catalog-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 20px 24px;
+  -webkit-overflow-scrolling: touch;
+}
+.gvto-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 12px;
+}
+.gvto-catalog-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 220ms var(--gvto-ease);
+  cursor: pointer;
+}
+.gvto-catalog-item:active { transform: scale(0.98); }
+.gvto-catalog-thumb {
+  width: 100%;
+  aspect-ratio: 4/5;
+  background: var(--gvto-fill-3);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.gvto-catalog-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gvto-catalog-name {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 19px;
+  letter-spacing: -0.01em;
+  color: var(--gvto-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  padding: 0 2px;
+}
+.gvto-catalog-price {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gvto-text-2);
+  padding: 0 2px;
+  margin-top: -4px;
+}
+
+/* Catalog empty + zero states */
+.gvto-catalog-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  gap: 8px;
+  text-align: center;
+}
+.gvto-catalog-empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--gvto-fill-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gvto-text-3);
+  margin-bottom: 6px;
+}
+.gvto-catalog-empty-icon svg { width: 28px; height: 28px; }
+.gvto-catalog-empty-title { font-size: 17px; font-weight: 600; line-height: 22px; }
+.gvto-catalog-empty-sub { font-size: 13px; line-height: 18px; color: var(--gvto-text-3); }
+.gvto-catalog-empty .gvto-btn { margin-top: 10px; }
+
+.gvto-catalog-skeleton {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.gvto-skel-card .gvto-skel-thumb {
+  width: 100%;
+  aspect-ratio: 4/5;
+  border-radius: 16px;
+  background: linear-gradient(90deg, var(--gvto-fill-3) 0%, rgba(118,118,128,0.18) 50%, var(--gvto-fill-3) 100%);
+  background-size: 200% 100%;
+  animation: gvto-shimmer 1.4s ease-in-out infinite;
+  margin-bottom: 6px;
+}
+.gvto-skel-card .gvto-skel-line {
+  height: 14px;
+  border-radius: 6px;
+  background: var(--gvto-fill-3);
+  margin: 6px 4px 0;
+}
+.gvto-skel-card .gvto-skel-line.s { width: 40%; }
+@keyframes gvto-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* ============ Coachmarks (first run) ============ */
+.gvto-coach {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 14;
+  animation: gvto-coach-fade 420ms var(--gvto-ease) 300ms both;
+}
+@keyframes gvto-coach-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.gvto-coach-tip {
+  position: absolute;
+  background: var(--gvto-text);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  white-space: nowrap;
+  letter-spacing: -0.005em;
+}
+.gvto-coach-canvas {
+  top: 44%;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: gvto-coach-bounce 2.2s var(--gvto-ease) infinite;
+}
+.gvto-coach-bar {
+  bottom: calc(env(safe-area-inset-bottom, 16px) + 76px);
+  left: 50%;
+  transform: translateX(-50%);
+  animation: gvto-coach-bounce 2.2s var(--gvto-ease) 300ms infinite;
+}
+@keyframes gvto-coach-bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(-4px); }
+}
+.gvto-coach-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+}
+.gvto-coach-arrow-up   { top: -5px;    border-bottom: 6px solid var(--gvto-text); }
+.gvto-coach-arrow-down { bottom: -5px; border-top: 6px solid var(--gvto-text); }
+
+/* ============ Hidden file input ============ */
+.gvto-file-input { display: none; }
+
+/* ============ Toast (non-critical notices) ============ */
+.gvto-toast {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom, 16px) + var(--gvto-s-6));
+  left: 50%;
+  transform: translate(-50%, 16px);
+  background: var(--gvto-text-1);
+  color: var(--gvto-text-inv);
+  padding: var(--gvto-s-3) var(--gvto-s-4);
+  border-radius: var(--gvto-r-3);
+  font-size: var(--gvto-fs-callout);
+  font-weight: var(--gvto-fw-medium);
+  letter-spacing: var(--gvto-tracking-tight);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--gvto-d-std) var(--gvto-ease), transform var(--gvto-d-std) var(--gvto-ease);
+  z-index: var(--gvto-z-toast);
+  box-shadow: var(--gvto-e-5);
+}
+.gvto-toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+.gvto-toast.is-top {
+  top: calc(env(safe-area-inset-top, 16px) + var(--gvto-s-4));
+  bottom: auto;
+  transform: translate(-50%, -16px);
+}
+.gvto-toast.is-top.is-visible { transform: translate(-50%, 0); }
+.gvto-toast.is-success { background: var(--gvto-success); color: var(--gvto-text-inv); }
+.gvto-toast.is-danger  { background: var(--gvto-danger);  color: var(--gvto-text-inv); }
+
+/* ============ Tablet / desktop ≥ 900px ============ */
+/* Creator AI-inspired layout: full-bleed image stage with all chrome as
+ * floating overlays. Product bar floats bottom-center, rail pills float
+ * top-right, catalog opens as a LEFT-anchored floating panel (not full-screen).
+ * Keeps image visible, consistent with the Creator AI showcase pattern.
+ */
+@media (min-width: 600px) {
+  .gvto-app { padding: 0; background: #EFEFF2; overflow: hidden; }
+
+  /* Stage — a centered bounded showcase */
+  .gvto-canvas {
+    left: max(32px, calc(50vw - 600px));
+    right: max(32px, calc(50vw - 600px));
+    top: max(32px, calc(50vh - 440px));
+    bottom: max(32px, calc(50vh - 440px));
+    border-radius: 24px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 28px 80px rgba(0,0,0,0.10);
+    background: #FFFFFF;
+    overflow: hidden;
+  }
+  .gvto-canvas-image,
+  .gvto-slider-after-img {
+    object-fit: contain;
+    background: #F5F5F7;
+  }
+  .gvto-slider-handle { width: 48px; height: 48px; }
+
+  /* Fade the bar while the catalog panel is showing to avoid overlap */
+  .gvto-bar.is-dimmed { opacity: 0; pointer-events: none; transition: opacity 220ms var(--gvto-ease); }
+
+  /* Floating rail — top-LEFT of stage, 3 individual pills */
+  .gvto-rail {
+    top: max(48px, calc(50vh - 440px + 16px));
+    left: max(48px, calc(50vw - 600px + 16px));
+    right: auto;
+    z-index: 11;
+  }
+
+  /* Close button — top-right of stage */
+  .gvto-close-btn {
+    top: max(48px, calc(50vh - 440px + 16px));
+    right: max(48px, calc(50vw - 600px + 16px));
+  }
+
+  /* Empty state inside stage */
+  .gvto-empty { background: #FFFFFF; }
+  .gvto-empty-card {
+    max-width: 460px;
+    padding: 40px 36px;
+    border: none;
+    box-shadow: none;
+  }
+  .gvto-empty-headline { font-size: 28px; line-height: 34px; }
+  .gvto-empty-sub { font-size: 15px; line-height: 22px; }
+  .gvto-empty-example { width: 84px; height: 120px; }
+  .gvto-empty-cta { height: 56px; font-size: 16px; max-width: 320px; align-self: center; }
+
+  /* Processing card stays centered in canvas */
+  .gvto-proc-card { max-width: 360px; }
+
+  /* Floating bar — bottom-center of stage, compact */
+  .gvto-bar {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: min(440px, calc(100% - 96px));
+    max-width: 440px;
+    bottom: max(48px, calc(50vh - 440px + 20px));
+    animation: gvto-bar-in 320ms var(--gvto-ease);
+  }
+  .gvto-bar.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(8px);
+  }
+  /* More breathing room between the Choose-another pill and the card */
+  .gvto-bar[data-mode="product"] .gvto-bar-body { gap: 14px; }
+  .gvto-bar-float { font-size: 13px; height: 34px; padding: 0 14px 0 10px; }
+  .gvto-bar-float svg { width: 15px; height: 15px; }
+  /* Keep the product card tight and the Add button fixed-width so the name
+   * can't stretch the card unpredictably */
+  .gvto-bar-card { padding: 6px 6px 6px 10px; }
+  .gvto-bar-thumb { width: 36px; height: 44px; }
+  /* Desktop: show the "Add to Bag" label (mobile is icon-only) */
+  .gvto-bar-add { width: auto; height: 44px; padding: 0 18px; font-size: 13px; flex: 0 0 auto; gap: 8px; }
+  .gvto-bar-add svg { width: 18px; height: 18px; stroke-width: 2; }
+  .gvto-bar-add-text { display: inline; }
+  /* Desktop: single-line product name, truncate with ellipsis */
+  .gvto-bar-name { -webkit-line-clamp: 1; }
+
+  /* Catalog — LEFT-anchored floating panel (Creator AI pattern).
+   * Rail is dimmed while the catalog is open (see .gvto-rail.is-dimmed). */
+  .gvto-catalog-sheet {
+    position: absolute;
+    inset: auto;
+    top: max(48px, calc(50vh - 440px + 16px));
+    bottom: max(48px, calc(50vh - 440px + 16px));
+    left: max(48px, calc(50vw - 600px + 16px));
+    width: min(420px, calc(100% - 32px));
+    max-width: 420px;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 0;
+    align-items: stretch;
+    justify-content: stretch;
+    z-index: var(--gvto-z-catalog);
+  }
+  .gvto-catalog-panel {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border-radius: var(--gvto-r-6);
+    transform: translateX(-16px);
+    box-shadow: var(--gvto-e-6);
+  }
+  .gvto-catalog-sheet.is-open .gvto-catalog-panel { transform: translateX(0); }
+  .gvto-catalog-grid { grid-template-columns: repeat(2, 1fr); }
+  .gvto-catalog-skeleton { grid-template-columns: repeat(2, 1fr); }
+
+  /* Expanded product sheet — centered modal */
+  .gvto-sheet {
+    left: 50%;
+    top: 50%;
+    bottom: auto;
+    right: auto;
+    transform: translate(-50%, calc(-50% + 32px));
+    max-width: 520px;
+    width: 520px;
+    max-height: 82vh;
+    border-radius: 24px;
+    opacity: 0;
+    transition: opacity 320ms var(--gvto-ease), transform 320ms var(--gvto-ease);
+  }
+  .gvto-sheet.is-open { transform: translate(-50%, -50%); opacity: 1; }
+  .gvto-sheet .gvto-grabber { display: none; }
+  .gvto-sheet .gvto-sheet-close { display: flex; }
+  .gvto-sheet .gvto-expanded-extras { display: block; max-height: 60vh; padding-top: 20px; }
+}
+
+/* Ultra-wide cap — pin stage to a pleasant showcase size (min-height required
+ * so this only kicks in when there's actually vertical room). */
+@media (min-width: 1280px) and (min-height: 900px) {
+  .gvto-canvas {
+    left: calc(50vw - 600px);
+    right: calc(50vw - 600px);
+    top: calc(50vh - 440px);
+    bottom: calc(50vh - 440px);
+  }
+  .gvto-rail {
+    top: calc(50vh - 440px + 16px);
+    left: calc(50vw - 600px + 16px);
+    right: auto;
+  }
+  .gvto-close-btn {
+    top: calc(50vh - 440px + 16px);
+    right: calc(50vw - 600px + 16px);
+  }
+  .gvto-bar { bottom: calc(50vh - 440px + 20px); }
+}
+
+/* ============ Dark mode (baseline — not audited) ============ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gvto-canvas: #000000;
+    --gvto-surface: #1C1C1E;
+    --gvto-surface-blur: rgba(28, 28, 30, 0.64);
+    --gvto-separator: rgba(84, 84, 88, 0.36);
+    --gvto-text: #F2F2F7;
+    --gvto-text-2: #AEAEB2;
+    --gvto-text-3: #636366;
+    --gvto-fill-3: rgba(118, 118, 128, 0.24);
+  }
+  .gvto-processing { background: rgba(0, 0, 0, 0.5); }
+  .gvto-error { background: rgba(255, 69, 58, 0.14); }
+  .gvto-empty-card { background: var(--gvto-surface); border-color: rgba(84, 84, 88, 0.5); }
+}

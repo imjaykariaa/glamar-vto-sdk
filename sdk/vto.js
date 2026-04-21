@@ -398,7 +398,6 @@
 
         <!-- Processing — premium long-wait state (30–40s) -->
         <div class="gvto-processing" data-role="processing">
-          <div class="gvto-scan-line" aria-hidden="true"></div>
           <div class="gvto-proc-card">
             <div class="gvto-proc-dots" aria-hidden="true"><span></span><span></span><span></span></div>
             <div class="gvto-proc-stage" data-role="proc-stage">Analyzing your photo</div>
@@ -1235,7 +1234,6 @@
       this.state.sheetMode = null;
     },
     hideSheet() { this.collapseSheet(); },
-    showSheet() { /* no-op kept for back-compat */ },
 
     renderSheet() {
       if (this.state.sheetMode === 'product-expanded') {

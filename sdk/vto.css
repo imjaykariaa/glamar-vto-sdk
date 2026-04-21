@@ -13,7 +13,7 @@
  *   4. Radius        — seven-step scale, from chip to pill
  *   5. Elevation     — six shadow tiers
  *   6. Motion        — four durations + one primary curve
- *   7. Blur (glass)  — four depths of frosted glass
+ *   7. Blur (glass)  — two depths of frosted glass
  *   8. Control sizes — from 36px chip to 52px CTA
  *   9. Z-index       — stacking scale
  *
@@ -55,7 +55,6 @@
   --gvto-stage:         #FAFAFA;             /* default canvas/stage bg */
   --gvto-surface:       #FFFFFF;             /* cards, panels, modals */
   --gvto-surface-alt:   #F5F5F7;             /* subdued (catalog thumbs, bar fill) */
-  --gvto-surface-glass: rgba(255, 255, 255, 0.70); /* frosted-glass overlays */
 
   /* Hairlines & fills */
   --gvto-hairline:  rgba(0, 0, 0, 0.06);
@@ -78,7 +77,6 @@
   --gvto-accent:         #0A84FF;            /* iOS blue — links only, NEVER CTA */
   --gvto-success:        #30D158;
   --gvto-danger:         #FF453A;
-  --gvto-destructive:    var(--gvto-danger); /* legacy alias */
 
   /* ====== 2. Typography ====== */
   --gvto-font: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', sans-serif;
@@ -113,7 +111,6 @@
   --gvto-s-6:  24px;
   --gvto-s-7:  32px;
   --gvto-s-8:  40px;
-  --gvto-s-9:  48px;
 
   /* ====== 4. Radius ====== */
   --gvto-r-1:    6px;     /* tiny — sizechip, thumbnail ornament */
@@ -137,19 +134,15 @@
   --gvto-shadow-sheet: var(--gvto-e-5);
 
   /* ====== 6. Motion ====== */
-  --gvto-ease:     cubic-bezier(0.22, 1, 0.36, 1);  /* primary — "quart out" */
-  --gvto-ease-out: cubic-bezier(0, 0, 0.2, 1);      /* deceleration */
-
+  --gvto-ease:    cubic-bezier(0.22, 1, 0.36, 1);  /* primary — "quart out" */
   --gvto-d-fast:  120ms;   /* press, hover */
   --gvto-d-std:   220ms;   /* state, colour */
   --gvto-d-slow:  320ms;   /* reveals */
   --gvto-d-sheet: 360ms;   /* sheet/panel slide */
 
   /* ====== 7. Blur (frosted glass) ====== */
-  --gvto-blur-sm: blur(12px) saturate(180%);   /* scrim */
   --gvto-blur-md: blur(20px) saturate(180%);   /* rail pills, bar */
   --gvto-blur-lg: blur(28px) saturate(180%);   /* sheets */
-  --gvto-blur-xl: blur(40px) saturate(180%);   /* toolbars (legacy) */
 
   /* ====== 8. Control sizes ====== */
   --gvto-ctl-sm:  36px;    /* catalog floating pill, chips */
@@ -653,7 +646,7 @@
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
 }
 .gvto-bar[data-mode="error"] .gvto-error { background: transparent; border-left: none; padding: 0; }
-.gvto-bar[data-mode="error"] .gvto-error-icon { color: var(--gvto-destructive); }
+.gvto-bar[data-mode="error"] .gvto-error-icon { color: var(--gvto-danger); }
 .gvto-bar[data-mode="error"] .gvto-error-icon svg { width: 18px; height: 18px; }
 
 /* Narrow viewport — drop the thumb, let name/price carry */
@@ -690,61 +683,6 @@
   margin: 0 auto 16px;
 }
 .gvto-sheet-body { position: relative; }
-
-/* Product info — peek */
-.gvto-peek {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.gvto-peek-head {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  cursor: pointer;
-}
-.gvto-peek-thumb {
-  width: 56px;
-  height: 72px;
-  border-radius: 10px;
-  object-fit: cover;
-  flex-shrink: 0;
-  background: var(--gvto-fill-3);
-}
-.gvto-peek-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.gvto-peek-body .gvto-product-name {
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 20px;
-  letter-spacing: -0.01em;
-  color: var(--gvto-text);
-  -webkit-line-clamp: 2;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.gvto-peek-body .gvto-product-price {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--gvto-text-2);
-}
-.gvto-peek-expand {
-  width: 32px;
-  height: 32px;
-  color: var(--gvto-text-3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transform: rotate(-90deg);
-}
-.gvto-peek-expand svg { width: 14px; height: 14px; }
 
 /* Product info — expanded (header row with larger thumb) */
 .gvto-product {
@@ -814,18 +752,6 @@
 .gvto-btn.is-success { background: var(--gvto-success); color: #fff; }
 .gvto-btn.is-full { width: 100%; }
 
-.gvto-cta-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-shrink: 0;
-}
-.gvto-cta-size {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
-  margin-left: 4px;
-}
-
 /* Product expanded extras */
 .gvto-expanded-extras {
   display: none;
@@ -872,19 +798,6 @@
   text-decoration: line-through;
   pointer-events: none;
 }
-
-.gvto-row-link {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 44px;
-  padding: 0 4px;
-  color: var(--gvto-text);
-  font-size: 15px;
-  font-weight: 500;
-  border-top: 1px solid var(--gvto-separator);
-}
-.gvto-row-link svg { width: 14px; height: 14px; color: var(--gvto-text-3); }
 
 .gvto-add-full {
   width: 100%;
@@ -1193,9 +1106,6 @@
   -webkit-backdrop-filter: blur(18px) saturate(110%);
   pointer-events: none;
 }
-
-/* Scan-line element retained for DOM compat but rendered as a no-op */
-.gvto-scan-line { display: none; }
 
 /* Editorial status card — tight typography, restrained chrome.
  * Fixed width so the card does not resize as stage copy changes. */
@@ -1512,12 +1422,6 @@
   white-space: nowrap;
   letter-spacing: -0.005em;
 }
-.gvto-coach-canvas {
-  top: 44%;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: gvto-coach-bounce 2.2s var(--gvto-ease) infinite;
-}
 .gvto-coach-bar {
   bottom: calc(env(safe-area-inset-bottom, 16px) + 76px);
   left: 50%;
@@ -1537,7 +1441,6 @@
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
 }
-.gvto-coach-arrow-up   { top: -5px;    border-bottom: 6px solid var(--gvto-text); }
 .gvto-coach-arrow-down { bottom: -5px; border-top: 6px solid var(--gvto-text); }
 
 /* ============ Hidden file input ============ */
@@ -1740,9 +1643,8 @@
   :root {
     --gvto-canvas: #000000;
     --gvto-surface: #1C1C1E;
-    --gvto-surface-blur: rgba(28, 28, 30, 0.64);
     --gvto-separator: rgba(84, 84, 88, 0.36);
-    --gvto-text: #F2F2F7;
+    --gvto-text-1: #F2F2F7;
     --gvto-text-2: #AEAEB2;
     --gvto-text-3: #636366;
     --gvto-fill-3: rgba(118, 118, 128, 0.24);

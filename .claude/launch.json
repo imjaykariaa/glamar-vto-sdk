@@ -4,7 +4,7 @@
     {
       "name": "vto-demo",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["http-server", "packages/sdk", "-p", "8090", "-c-1", "--cors"],
+      "runtimeArgs": ["http-server", ".", "-p", "8090", "-c-1", "--cors"],
       "port": 8090
     }
   ]

@@ -271,14 +271,8 @@
   overflow: hidden;
   background: var(--gvto-fill-3);
   border: 1px solid rgba(0, 0, 0, 0.05);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  color: var(--gvto-text-3);
-  padding: 8px 4px 0;
 }
 .gvto-empty-example img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.gvto-empty-example svg { width: 100%; height: 100%; color: var(--gvto-text-3); }
 .gvto-empty-tips {
   display: flex;
   flex-direction: column;
@@ -414,6 +408,9 @@
 /* Dim the bar and rail when a blocking overlay (catalog, processing) is active */
 .gvto-bar.is-dimmed,
 .gvto-rail.is-dimmed { opacity: 0; pointer-events: none; }
+/* Sheet open: the sheet carries its own "Try another style" pill above it,
+ * so hide the whole bar to avoid duplicate chrome. */
+.gvto-bar.is-sheet-open { opacity: 0; pointer-events: none; }
 
 /* ============ Left rail — 3 individual floating pills ============ */
 .gvto-rail {
@@ -671,7 +668,10 @@
   transition: transform 360ms var(--gvto-ease);
   z-index: 20;
   max-height: 80vh;
-  overflow: hidden;
+  /* overflow visible so .gvto-sheet-try-another can float above the sheet's top edge.
+   * Rounded corners on the sheet surface still hold — no child scrolls against them
+   * (gvto-expanded-extras scrolls internally). */
+  overflow: visible;
 }
 .gvto-sheet.is-open { transform: translateY(0); }
 .gvto-sheet.is-expanded { max-height: 80vh; }
@@ -683,6 +683,34 @@
   margin: 0 auto 16px;
 }
 .gvto-sheet-body { position: relative; }
+
+/* Floating "Try another style" pill that sits ABOVE the sheet on both
+ * mobile and desktop. Lives inside .gvto-sheet-body, which sits ~28px
+ * below the sheet's top edge (8px sheet top padding + grabber 4px + 16px
+ * margin). Add that 28px back so the pill clears the sheet's top edge. */
+.gvto-sheet-try-another {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 40px);
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px 0 12px;
+  border-radius: 999px;
+  background: var(--gvto-surface);
+  color: var(--gvto-text-1);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  white-space: nowrap;
+  transition: background 220ms var(--gvto-ease);
+}
+.gvto-sheet-try-another:hover { background: var(--gvto-fill-3); }
+.gvto-sheet-try-another:active { transform: translateX(-50%) scale(0.97); }
+.gvto-sheet-try-another svg { width: 16px; height: 16px; }
 
 /* Product info — expanded (header row with larger thumb) */
 .gvto-product {
@@ -748,8 +776,11 @@
 .gvto-btn:active { transform: scale(0.98); }
 .gvto-btn:disabled { opacity: 0.35; cursor: default; }
 .gvto-btn.is-secondary { background: var(--gvto-fill-3); color: var(--gvto-text); }
+.gvto-btn.is-secondary:not(:disabled):hover { background: var(--gvto-fill-4); }
 .gvto-btn.is-ghost { background: transparent; color: var(--gvto-text); padding: 0 14px; }
+.gvto-btn.is-ghost:not(:disabled):hover { background: var(--gvto-fill-3); }
 .gvto-btn.is-success { background: var(--gvto-success); color: #fff; }
+.gvto-btn.is-success:not(:disabled):hover { background: var(--gvto-success); }
 .gvto-btn.is-full { width: 100%; }
 
 /* Product expanded extras */
@@ -806,7 +837,9 @@
   font-size: 15px;
   font-weight: 500;
   letter-spacing: 0.02em;
+  gap: 8px;
 }
+.gvto-add-full svg { width: 18px; height: 18px; flex: 0 0 auto; }
 .gvto-cta-stack {
   display: flex;
   flex-direction: column;
@@ -1597,22 +1630,19 @@
   .gvto-catalog-grid { grid-template-columns: repeat(2, 1fr); }
   .gvto-catalog-skeleton { grid-template-columns: repeat(2, 1fr); }
 
-  /* Expanded product sheet — centered modal */
+  /* Expanded product sheet — bottom sheet, centered within the stage width */
   .gvto-sheet {
     left: 50%;
-    top: 50%;
-    bottom: auto;
     right: auto;
-    transform: translate(-50%, calc(-50% + 32px));
+    bottom: max(32px, calc(50vh - 440px));
+    transform: translate(-50%, calc(100% + 32px));
+    width: min(520px, calc(100% - 96px));
     max-width: 520px;
-    width: 520px;
-    max-height: 82vh;
+    max-height: 70vh;
     border-radius: 24px;
-    opacity: 0;
-    transition: opacity 320ms var(--gvto-ease), transform 320ms var(--gvto-ease);
+    transition: transform 360ms var(--gvto-ease);
   }
-  .gvto-sheet.is-open { transform: translate(-50%, -50%); opacity: 1; }
-  .gvto-sheet .gvto-grabber { display: none; }
+  .gvto-sheet.is-open { transform: translate(-50%, 0); }
   .gvto-sheet .gvto-sheet-close { display: flex; }
   .gvto-sheet .gvto-expanded-extras { display: block; max-height: 60vh; padding-top: 20px; }
 }

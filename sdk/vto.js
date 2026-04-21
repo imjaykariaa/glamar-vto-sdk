@@ -365,20 +365,20 @@
               <div class="gvto-empty-headline">See it on you</div>
               <div class="gvto-empty-sub">Upload one photo. Try any piece, in seconds.</div>
               <div class="gvto-empty-examples" aria-hidden="true">
-                <div class="gvto-empty-example gvto-example-good">
-                  <svg viewBox="0 0 68 110" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="34" cy="18" r="8" fill="currentColor"/><path d="M22 34 C22 30, 26 28, 34 28 C42 28, 46 30, 46 34 L48 62 L42 78 L42 100 L38 100 L37 80 L34 66 L31 80 L30 100 L26 100 L26 78 L20 62 Z" fill="currentColor"/></svg>
+                <div class="gvto-empty-example">
+                  <img src="sdk/assets/ref-woman.jpg" alt="" loading="lazy" />
                 </div>
-                <div class="gvto-empty-example gvto-example-good">
-                  <svg viewBox="0 0 68 110" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="34" cy="18" r="7.5" fill="currentColor"/><path d="M24 30 C24 28, 28 27, 34 27 C40 27, 44 28, 44 30 L46 58 L42 64 L42 100 L38 100 L37 75 L34 65 L31 75 L30 100 L26 100 L26 64 L22 58 Z" fill="currentColor"/></svg>
+                <div class="gvto-empty-example">
+                  <img src="sdk/assets/ref-man-beige.jpg" alt="" loading="lazy" />
                 </div>
-                <div class="gvto-empty-example gvto-example-good">
-                  <svg viewBox="0 0 68 110" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="34" cy="18" r="7" fill="currentColor"/><path d="M25 32 C25 29, 30 27, 34 27 C38 27, 43 29, 43 32 L46 60 L40 70 L44 100 L38 100 L35 74 L34 72 L33 74 L30 100 L24 100 L28 70 L22 60 Z" fill="currentColor"/></svg>
+                <div class="gvto-empty-example">
+                  <img src="sdk/assets/ref-man-white.jpg" alt="" loading="lazy" />
                 </div>
               </div>
               <div class="gvto-empty-tips">
-                <div class="gvto-empty-tip">${icons.check}<span>A plain backdrop</span></div>
+                <div class="gvto-empty-tip">${icons.check}<span>A plain background</span></div>
                 <div class="gvto-empty-tip">${icons.check}<span>Face the camera</span></div>
-                <div class="gvto-empty-tip">${icons.check}<span>Natural, even light</span></div>
+                <div class="gvto-empty-tip">${icons.check}<span>A full front view</span></div>
               </div>
               <button class="gvto-empty-cta" data-action="upload">Add your photo</button>
               <div class="gvto-empty-hint">JPG or PNG · up to 10 MB</div>
@@ -1228,10 +1228,14 @@
       this.state.sheetMode = 'product-expanded';
       this.renderSheet();
       this.els.sheet.classList.add('is-open', 'is-expanded');
+      // Hide the product card in the bar but keep the "Try another style"
+      // float pill visible above the sheet.
+      this.els.bar.classList.add('is-sheet-open');
     },
     collapseSheet() {
       this.els.sheet.classList.remove('is-open', 'is-expanded');
       this.state.sheetMode = null;
+      this.els.bar.classList.remove('is-sheet-open');
     },
     hideSheet() { this.collapseSheet(); },
 
@@ -1307,19 +1311,32 @@
         <span class="gvto-price-now">${formatPrice(p.price, p.currency)}</span>
         ${p.priceCompareAt ? `<span class="gvto-price-was">${formatPrice(p.priceCompareAt, p.currency)}</span>` : ''}
       `;
-      const addLabel = btnState === 'loading'
-        ? `<div class="gvto-spinner" style="width:18px;height:18px;border-width:2px;border-top-color:#fff;"></div>`
-        : btnState === 'success'
-          ? `${icons.check}<span>Added to Bag</span>`
-          : `<span>Add to Bag</span>`;
-      const addClass = btnState === 'success' ? 'is-success' : '';
-      const viewBagRow = btnState === 'success' && this.state.bagUrl
-        ? `<button class="gvto-btn is-ghost is-full" data-action="view-bag" style="margin-top:8px;height:44px;">View Bag</button>`
-        : '';
+      // One-button model: Add to Bag → (loading) → View Bag (green).
+      // Matches the bar behaviour — single button swaps in place, no extra row.
+      let addLabel, addAction = 'add-to-bag', addClass = '', disabled = !sz;
+      if (btnState === 'loading') {
+        addLabel = `<div class="gvto-spinner" style="width:18px;height:18px;border-width:2px;border-top-color:#fff;"></div>`;
+        disabled = true;
+      } else if (btnState === 'success') {
+        addClass = 'is-success';
+        if (this.state.bagUrl) {
+          addLabel = `${icons.check}<span>View Bag</span>`;
+          addAction = 'view-bag';
+          disabled = false;
+        } else {
+          addLabel = `${icons.check}<span>Added to Bag</span>`;
+          disabled = true;
+        }
+      } else {
+        addLabel = `<span>Add to Bag</span>`;
+      }
       const sizes = (p.sizes || []).map((s) => `
         <button class="gvto-size-chip ${sz && s.sku === sz.sku ? 'is-selected' : ''} ${s.inStock ? '' : 'is-oos'}" data-size-sku="${s.sku}">${escapeHtml(s.label)}</button>
       `).join('');
       return `
+        <button class="gvto-sheet-try-another" data-action="choose-another" aria-label="Try another style">
+          ${icons.hanger}<span>Try another style</span>
+        </button>
         <div class="gvto-product">
           <img class="gvto-product-thumb" src="${p.image}" alt="${escapeHtml(p.name)}" style="width:72px;height:92px;"/>
           <div class="gvto-product-info">
@@ -1333,12 +1350,8 @@
             <div class="gvto-sizes">${sizes}</div>
           ` : ''}
           <div class="gvto-cta-stack">
-            <button class="gvto-btn is-secondary gvto-cta-alt" data-action="choose-another">
-              ${icons.hanger}<span>Try another style</span>
-            </button>
-            <button class="gvto-btn ${addClass} gvto-add-full" data-action="add-to-bag" ${!sz || btnState==='loading' ? 'disabled' : ''}>${addLabel}</button>
+            <button class="gvto-btn ${addClass} gvto-add-full" data-action="${addAction}" ${disabled ? 'disabled' : ''}>${addLabel}</button>
           </div>
-          ${viewBagRow}
         </div>
       `;
     },

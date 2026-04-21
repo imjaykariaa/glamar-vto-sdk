@@ -393,11 +393,8 @@
           <button class="gvto-rail-btn" data-action="share" data-role="btn-share" aria-label="Share" disabled>${icons.share}</button>
         </div>
 
-        <!-- Close — dismiss the SDK. Only shown when the merchant wires up
-             config.onClose; in full-page embeds there's nothing to close to. -->
-        ${typeof this.config.onClose === 'function'
-          ? `<button class="gvto-close-btn" data-action="close" aria-label="Close">${icons.close}</button>`
-          : ''}
+        <!-- Close — visual only for now; no-op until a merchant close flow is wired. -->
+        <button class="gvto-close-btn" aria-label="Close">${icons.close}</button>
 
         <!-- Processing — premium long-wait state (30–40s) -->
         <div class="gvto-processing" data-role="processing">
